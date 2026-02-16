@@ -48,3 +48,5 @@ tfplan.json
 resources.json
 issues.json
 issues.csv
+.env
+.tools

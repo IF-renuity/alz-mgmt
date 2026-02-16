@@ -1,0 +1,44 @@
+{
+    "bootstrap_modules": {
+        "alz_azuredevops": {
+            "location": "alz/azuredevops",
+            "short_name": "Azure DevOps: Azure Landing Zones",
+            "description": "Azure Landing Zones with Azure DevOps",
+            "starter_modules": "alz"
+        },
+        "alz_github": {
+            "location": "alz/github",
+            "short_name": "GitHub: Azure Landing Zones",
+            "description": "Azure Landing Zones with GitHub",
+            "starter_modules": "alz"
+        },
+        "alz_local": {
+            "location": "alz/local",
+            "short_name": "Local: Azure Landing Zones",
+            "description": "Azure Landing Zones for local file system",
+            "starter_modules": "alz"
+        }
+    },
+    "starter_modules": {
+        "alz": {
+            "terraform": {
+                "url": "https://github.com/Azure/alz-terraform-accelerator",
+                "release_artifact_name": "starter_modules.zip",
+                "release_artifact_root_path": ".",
+                "release_artifact_config_file": ".config/ALZ-Powershell.config.json"
+            },
+            "bicep": {
+                "url": "https://github.com/Azure/alz-bicep-accelerator",
+                "release_artifact_name": "starter_modules.zip",
+                "release_artifact_root_path": ".",
+                "release_artifact_config_file": ".config/ALZ-Powershell.config.json"
+            },
+            "bicep-classic": {
+                "url": "https://github.com/Azure/ALZ-Bicep",
+                "release_artifact_name": "accelerator.zip",
+                "release_artifact_root_path": ".",
+                "release_artifact_config_file": "accelerator/.config/ALZ-Powershell-Auto.config.json"
+            }
+        }
+    }
+}
