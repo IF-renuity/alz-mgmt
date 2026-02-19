@@ -19,7 +19,11 @@ on:
         required: true
         default: 'latest'
         type: string
-
+      root_module_folder_relative_path:
+        description: 'relative path of terrform scripts to be executed'
+        required: true
+        default: './platform/only_connectivity'
+        type: string
 jobs:
   plan_and_apply:
     uses: IF-renuity/alz-mgmt-templates/.github/workflows/cd-template.yaml@main
@@ -29,5 +33,5 @@ jobs:
       contents: read
     with:
       terraform_action: ${{ inputs.terraform_action }}
-      root_module_folder_relative_path: '.'
+      root_module_folder_relative_path: ${{root_module_folder_relative_path}}
       terraform_cli_version: ${{ inputs.terraform_cli_version }}
