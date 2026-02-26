@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cloud-Agnostic AI Platform on Azure — White Paper</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,300;1,9..144,600&family=Figtree:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ─────────────────────────────────────────
+   THEME TOKENS
+───────────────────────────────────────── */
+:root {
+  --accent: #1a56db;
+  --accent-soft: rgba(26,86,219,0.1);
+  --accent-border: rgba(26,86,219,0.22);
+  --accent2: #0e9fa8;
+  --gold: #b45309;
+  --green: #047857;
+  --red: #c0392b;
+  --purple: #6d28d9;
+}
+
+[data-theme="light"] {
+  --bg: #f7f6f2;
+  --bg2: #ffffff;
+  --bg3: #eeecea;
+  --surface: #ffffff;
+  --surface2: #f0eeea;
+  --ink: #111218;
+  --ink2: #2d2f3a;
+  --ink3: #4a4d5e;
+  --muted: #7a7d8e;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.05);
+  --shadow: 0 2px 16px rgba(0,0,0,0.07);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.10);
+  --cover-bg: #0e1220;
+  --cover-text: #ffffff;
+}
+
+[data-theme="dark"] {
+  --bg: #0d1117;
+  --bg2: #161b27;
+  --bg3: #1c2333;
+  --surface: #1c2333;
+  --surface2: #222840;
+  --ink: #f0f0f4;
+  --ink2: #c9d1e0;
+  --ink3: #99a3b8;
+  --muted: #6b748a;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.04);
+  --shadow: 0 2px 16px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.5);
+  --cover-bg: #060910;
+  --cover-text: #ffffff;
+}
+
+[data-theme="warm"] {
+  --bg: #fdf8f0;
+  --bg2: #fffcf7;
+  --bg3: #f5ede0;
+  --surface: #ffffff;
+  --surface2: #f5ede0;
+  --ink: #1a120a;
+  --ink2: #3d2b1a;
+  --ink3: #5c4333;
+  --muted: #8a7060;
+  --border: rgba(100,60,20,0.1);
+  --border2: rgba(100,60,20,0.06);
+  --shadow: 0 2px 16px rgba(80,40,0,0.08);
+  --shadow-lg: 0 8px 40px rgba(80,40,0,0.12);
+  --cover-bg: #1a0e05;
+  --cover-text: #ffffff;
+}
+
+/* Accent palettes */
+[data-accent="blue"]   { --accent:#1a56db; --accent-soft:rgba(26,86,219,0.09); --accent-border:rgba(26,86,219,0.22); }
+[data-accent="teal"]   { --accent:#0e7490; --accent-soft:rgba(14,116,144,0.09); --accent-border:rgba(14,116,144,0.22); }
+[data-accent="violet"] { --accent:#6d28d9; --accent-soft:rgba(109,40,217,0.09); --accent-border:rgba(109,40,217,0.22); }
+[data-accent="slate"]  { --accent:#334155; --accent-soft:rgba(51,65,85,0.09);   --accent-border:rgba(51,65,85,0.22); }
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Figtree',sans-serif;background:var(--bg);color:var(--ink);font-size:15.5px;line-height:1.78;transition:background .3s,color .3s;overflow-x:hidden;}
+
+/* THEME PANEL */
+.theme-panel{position:fixed;top:24px;right:24px;z-index:1000;display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+.theme-btn{width:42px;height:42px;border-radius:50%;border:1px solid var(--border);background:var(--surface);box-shadow:var(--shadow);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--ink);transition:all .2s;}
+.theme-btn:hover{box-shadow:var(--shadow-lg);transform:scale(1.05);}
+.theme-drawer{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;box-shadow:var(--shadow-lg);display:none;flex-direction:column;gap:14px;min-width:190px;}
+.theme-drawer.open{display:flex;}
+.t-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.t-row{display:flex;gap:8px;flex-wrap:wrap;}
+.t-btn{padding:6px 12px;border-radius:6px;border:1.5px solid var(--border);background:var(--bg2);color:var(--ink3);font-size:12px;font-family:'Figtree',sans-serif;cursor:pointer;transition:all .15s;font-weight:500;}
+.t-btn:hover,.t-btn.active{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);}
+.acc-dot{width:24px;height:24px;border-radius:50%;border:2.5px solid transparent;cursor:pointer;transition:all .15s;}
+.acc-dot:hover,.acc-dot.active{border-color:var(--ink);transform:scale(1.15);}
+.acc-dot.blue{background:#1a56db;}.acc-dot.teal{background:#0e7490;}.acc-dot.violet{background:#6d28d9;}.acc-dot.slate{background:#334155;}
+
+/* COVER */
+.cover{background:var(--cover-bg);color:#fff;min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:80px 100px;position:relative;overflow:hidden;}
+.cover-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 0%,transparent 75%);}
+.cover-glow{position:absolute;width:700px;height:500px;border-radius:50%;background:radial-gradient(ellipse,rgba(26,86,219,.15) 0%,transparent 65%);top:-100px;right:-100px;pointer-events:none;}
+.cover-glow2{position:absolute;width:500px;height:400px;border-radius:50%;background:radial-gradient(ellipse,rgba(14,116,144,.1) 0%,transparent 65%);bottom:-50px;left:0;pointer-events:none;}
+.cover-content{position:relative;z-index:1;max-width:820px;}
+.cover-eye{display:inline-flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:32px;}
+.eye-dot{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+.cover h1{font-family:'Fraunces',serif;font-size:clamp(38px,5.5vw,70px);font-weight:700;line-height:1.06;letter-spacing:-.025em;margin-bottom:10px;color:#fff;}
+.cover h1 em{font-style:italic;font-weight:300;color:rgba(255,255,255,.6);}
+.cover-sub{font-family:'Fraunces',serif;font-size:clamp(15px,2vw,22px);font-weight:300;font-style:italic;color:rgba(255,255,255,.42);margin-bottom:36px;}
+.cover-desc{font-size:15.5px;color:rgba(255,255,255,.52);max-width:560px;line-height:1.85;margin-bottom:48px;}
+.cover-pills{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:44px;}
+.pill{display:inline-flex;align-items:center;gap:7px;padding:6px 13px;border-radius:100px;font-size:11.5px;font-weight:500;}
+.pill::before{content:'';width:5px;height:5px;border-radius:50%;}
+.pill.done{background:rgba(4,120,87,.2);color:#6ee7b7;border:1px solid rgba(4,120,87,.3);}
+.pill.done::before{background:#6ee7b7;}
+.pill.road{background:rgba(180,83,9,.17);color:#fcd34d;border:1px solid rgba(180,83,9,.28);}
+.pill.road::before{background:#fcd34d;}
+.cover-meta{display:flex;gap:44px;flex-wrap:wrap;padding-top:36px;border-top:1px solid rgba(255,255,255,.09);}
+.meta-item{display:flex;flex-direction:column;gap:4px;}
+.meta-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.28);}
+.meta-val{font-size:13.5px;font-weight:500;color:rgba(255,255,255,.72);}
+
+/* PAGE */
+.page{max-width:1040px;margin:0 auto;padding:0 60px 120px;}
+
+/* TOC */
+.toc-wrap{padding:80px 0 0;margin-bottom:80px;}
+.toc-eye{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:26px;}
+.toc-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:var(--shadow);}
+.toc-item{display:flex;align-items:flex-start;gap:14px;padding:18px 22px;background:var(--surface);text-decoration:none;color:var(--ink);transition:background .15s;}
+.toc-item:hover{background:var(--accent-soft);}
+.toc-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);padding-top:2px;min-width:22px;}
+.toc-title{font-size:14px;font-weight:600;margin-bottom:3px;}
+.toc-sub{font-size:12px;color:var(--muted);}
+.toc-badge{margin-left:auto;padding:2px 8px;border-radius:100px;font-size:10px;font-family:'JetBrains Mono',monospace;white-space:nowrap;align-self:flex-start;margin-top:2px;}
+.toc-badge.done{background:rgba(4,120,87,.1);color:#047857;border:1px solid rgba(4,120,87,.2);}
+.toc-badge.road{background:rgba(180,83,9,.1);color:#b45309;border:1px solid rgba(180,83,9,.2);}
+
+/* SECTIONS */
+.sec{margin-top:80px;}
+.sec-rule{height:1px;background:linear-gradient(90deg,var(--accent),transparent);margin-bottom:48px;opacity:.3;}
+.sec-kick{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;}
+.sec-h{font-family:'Fraunces',serif;font-size:clamp(28px,4vw,48px);font-weight:700;line-height:1.1;letter-spacing:-.02em;color:var(--ink);margin-bottom:14px;}
+.sec-h em{font-style:italic;font-weight:300;color:var(--muted);}
+.sec-lead{font-size:16.5px;color:var(--ink3);max-width:660px;line-height:1.8;margin-bottom:44px;}
+.ch-status{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:100px;font-size:11.5px;font-weight:600;margin-bottom:32px;}
+.ch-status.built{background:rgba(4,120,87,.09);color:#047857;border:1px solid rgba(4,120,87,.2);}
+.ch-status.built::before{content:'✓  ';}
+.ch-status.choice{background:rgba(26,86,219,.09);color:var(--accent);border:1px solid var(--accent-border);}
+.ch-status.choice::before{content:'◎  ';}
+
+/* PROSE */
+.prose{max-width:760px;}
+.prose h3{font-family:'Fraunces',serif;font-size:22px;font-weight:600;color:var(--ink);margin:48px 0 14px;}
+.prose h4{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin:28px 0 10px;font-family:'JetBrains Mono',monospace;}
+.prose p{margin-bottom:18px;color:var(--ink2);}
+.prose strong{color:var(--ink);font-weight:600;}
+code{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--bg3);color:var(--accent);padding:1px 6px;border-radius:4px;}
+
+/* DECISION BOX — key architectural choice callout */
+.decision{border:1px solid var(--accent-border);border-radius:10px;padding:24px 26px;background:var(--accent-soft);margin:28px 0;}
+.decision-label{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.decision-label::before{content:'◎';font-size:13px;}
+.decision h5{font-size:15px;font-weight:600;color:var(--ink);margin-bottom:8px;}
+.decision p{font-size:13.5px;color:var(--ink2);margin:0;line-height:1.7;}
+
+/* CALLOUTS */
+.callout{display:flex;gap:14px;padding:16px 20px;border-radius:8px;margin:24px 0;font-size:14px;}
+.callout-icon{font-size:17px;flex-shrink:0;padding-top:1px;}
+.callout-body{flex:1;}
+.callout-title{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px;font-weight:500;}
+.callout p{margin:0;font-size:13.5px;color:var(--ink2);}
+.callout.info{background:var(--accent-soft);border:1px solid var(--accent-border);}
+.callout.info .callout-title{color:var(--accent);}
+.callout.warn{background:rgba(180,83,9,.07);border:1px solid rgba(180,83,9,.2);}
+.callout.warn .callout-title{color:#b45309;}
+.callout.success{background:rgba(4,120,87,.07);border:1px solid rgba(4,120,87,.2);}
+.callout.success .callout-title{color:#047857;}
+.callout.danger{background:rgba(192,57,43,.07);border:1px solid rgba(192,57,43,.2);}
+.callout.danger .callout-title{color:#c0392b;}
+
+/* CARDS */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:13px;margin:32px 0;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:24px;box-shadow:var(--shadow);transition:border-color .2s,box-shadow .2s;}
+.card:hover{border-color:var(--accent-border);box-shadow:var(--shadow-lg);}
+.card-icon{font-size:20px;margin-bottom:12px;}
+.card-title{font-size:14px;font-weight:600;margin-bottom:7px;color:var(--ink);}
+.card-body{font-size:12.5px;color:var(--ink3);line-height:1.7;}
+
+/* PILLAR */
+.pillar-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:32px 0;box-shadow:var(--shadow);}
+.pillar{background:var(--surface);padding:24px 20px;transition:background .15s;}
+.pillar:hover{background:var(--accent-soft);}
+.pillar-n{font-family:'Fraunces',serif;font-size:36px;font-weight:700;color:var(--accent-border);line-height:1;margin-bottom:10px;}
+.pillar-title{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:5px;}
+.pillar-text{font-size:11.5px;color:var(--muted);line-height:1.6;}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;border-radius:10px;overflow:hidden;border:1px solid var(--border);box-shadow:var(--shadow);margin:28px 0;}
+.data-table th{background:var(--surface2);padding:11px 16px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);}
+.data-table td{padding:13px 16px;font-size:13px;color:var(--ink2);border-bottom:1px solid var(--border2);background:var(--surface);vertical-align:top;}
+.data-table tr:last-child td{border-bottom:none;}
+.st-done{color:#047857;font-weight:600;font-size:11.5px;white-space:nowrap;}
+.st-road{color:#b45309;font-weight:600;font-size:11.5px;white-space:nowrap;}
+.st-choice{color:var(--accent);font-weight:600;font-size:11.5px;white-space:nowrap;}
+
+/* ARCH DIAGRAM */
+.arch-wrap{margin:40px 0;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);}
+.arch-head{display:flex;align-items:center;justify-content:space-between;padding:13px 22px;background:var(--surface2);border-bottom:1px solid var(--border);}
+.arch-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:8px;}
+.arch-lbl::before{content:'';width:3px;height:12px;background:var(--accent);border-radius:2px;}
+.arch-tag{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);background:var(--bg3);padding:3px 8px;border-radius:4px;}
+.arch-body{background:var(--surface);padding:28px 24px;overflow-x:auto;}
+
+/* FLOW STEPS */
+.flow-steps{margin:32px 0;}
+.flow-step{display:flex;gap:20px;padding:22px 0;border-bottom:1px solid var(--border2);}
+.flow-step:last-child{border:none;}
+.flow-num{width:32px;height:32px;flex-shrink:0;border-radius:50%;background:var(--accent-soft);border:1.5px solid var(--accent-border);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);font-weight:500;}
+.flow-content h5{font-size:14.5px;font-weight:600;color:var(--ink);margin-bottom:4px;}
+.flow-content p{font-size:13px;color:var(--ink3);margin:0;}
+.flow-tag{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:100px;font-size:10px;font-family:'JetBrains Mono',monospace;margin-bottom:5px;}
+.flow-tag.auto{background:rgba(4,120,87,.1);color:#047857;border:1px solid rgba(4,120,87,.2);}
+.flow-tag.human{background:rgba(26,86,219,.09);color:var(--accent);border:1px solid var(--accent-border);}
+.flow-tag.setup{background:rgba(180,83,9,.08);color:#b45309;border:1px solid rgba(180,83,9,.2);}
+
+/* ROADMAP */
+.roadmap-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin:32px 0;}
+.roadmap-item{background:var(--surface);border:1px solid var(--border);border-left:3px solid #b45309;border-radius:0 8px 8px 0;padding:18px 20px;box-shadow:var(--shadow);}
+.roadmap-phase{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:#b45309;margin-bottom:5px;}
+.roadmap-title{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:6px;}
+.roadmap-body{font-size:12.5px;color:var(--muted);line-height:1.6;}
+
+/* CHALLENGE TABLE */
+.ch-table{width:100%;border-collapse:collapse;border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);margin:32px 0;}
+.ch-table th{background:var(--surface2);padding:11px 16px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);}
+.ch-table td{padding:15px 16px;font-size:13px;color:var(--ink2);border-bottom:1px solid var(--border2);background:var(--surface);vertical-align:top;}
+.ch-table tr:last-child td{border-bottom:none;}
+.sev{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:100px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;white-space:nowrap;}
+.sev-h{background:rgba(192,57,43,.1);color:#c0392b;border:1px solid rgba(192,57,43,.2);}
+.sev-m{background:rgba(180,83,9,.1);color:#b45309;border:1px solid rgba(180,83,9,.2);}
+.sev-l{background:rgba(4,120,87,.1);color:#047857;border:1px solid rgba(4,120,87,.2);}
+
+/* CONCLUSION */
+.conclusion{background:linear-gradient(135deg,var(--accent-soft),rgba(14,116,144,.06));border:1px solid var(--accent-border);border-radius:12px;padding:56px;margin:72px 0 36px;text-align:center;box-shadow:var(--shadow);}
+.conclusion h2{font-family:'Fraunces',serif;font-size:34px;font-weight:700;color:var(--ink);margin-bottom:12px;}
+.conclusion p{color:var(--ink3);max-width:560px;margin:0 auto 28px;font-size:15.5px;}
+.tag-row{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;}
+.tag{padding:4px 11px;border-radius:100px;font-family:'JetBrains Mono',monospace;font-size:10px;background:var(--surface);border:1px solid var(--border);color:var(--ink3);}
+
+/* CODE */
+.code-wrap{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:24px 0;box-shadow:var(--shadow);}
+.code-top{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;background:var(--surface2);border-bottom:1px solid var(--border);}
+.code-file{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted);}
+.code-ltag{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--accent);background:var(--accent-soft);padding:2px 8px;border-radius:4px;}
+.code-body{background:#0d1117;padding:20px 18px;overflow-x:auto;}
+.code-body pre{font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.85;color:#c9d1d9;white-space:pre;}
+.ct{color:#79c0ff;}.ck{color:#ff7b72;}.cv{color:#a5d6ff;}.cs{color:#a8d58d;}.cc{color:#484f5e;}.cf{color:#d2a8ff;}
+
+/* FOOTER */
+.footer{border-top:1px solid var(--border);padding:34px 0;display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:12.5px;}
+.footer-brand{font-family:'Fraunces',serif;font-size:17px;font-weight:600;color:var(--ink);}
+.divider{height:1px;background:var(--border);margin:60px 0;}
+
+@media(max-width:780px){
+  .cover{padding:56px 28px;}
+  .page{padding:0 24px 80px;}
+  .toc-grid,.pillar-row,.roadmap-grid{grid-template-columns:1fr;}
+  .theme-panel{top:14px;right:14px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ THEME PANEL ═══ -->
+<div class="theme-panel" id="tp">
+  <button class="theme-btn" onclick="toggleDrawer()" title="Appearance">🎨</button>
+  <div class="theme-drawer" id="td">
+    <div>
+      <div class="t-label">Background</div>
+      <div class="t-row">
+        <button class="t-btn active" onclick="setTheme('light',this)">Light</button>
+        <button class="t-btn" onclick="setTheme('dark',this)">Dark</button>
+        <button class="t-btn" onclick="setTheme('warm',this)">Warm</button>
+      </div>
+    </div>
+    <div>
+      <div class="t-label">Accent</div>
+      <div class="t-row">
+        <div class="acc-dot blue active" onclick="setAccent('blue',this)" title="Blue"></div>
+        <div class="acc-dot teal" onclick="setAccent('teal',this)" title="Teal"></div>
+        <div class="acc-dot violet" onclick="setAccent('violet',this)" title="Violet"></div>
+        <div class="acc-dot slate" onclick="setAccent('slate',this)" title="Slate"></div>
+      </div>
+    </div>
+    <div>
+      <div class="t-label">Font Size</div>
+      <div class="t-row">
+        <button class="t-btn" onclick="setSize('14px',this)">S</button>
+        <button class="t-btn active" onclick="setSize('15.5px',this)">M</button>
+        <button class="t-btn" onclick="setSize('21px',this)">L</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ COVER ═══ -->
+<div class="cover">
+  <div class="cover-grid"></div>
+  <div class="cover-glow"></div>
+  <div class="cover-glow2"></div>
+  <div class="cover-content">
+    <div class="cover-eye"><span class="eye-dot"></span>White Paper &nbsp;·&nbsp; DataGrokr Analytics Private Limited &nbsp;·&nbsp; 2026</div>
+    <h1>Cloud-Agnostic<br><em>AI Platform</em><br>on Azure</h1>
+    <p class="cover-sub">Azure Verified Modules · Azure AI Foundry · Governed from Day Zero</p>
+    <p class="cover-desc">A production architecture blueprint documenting the design decisions, implementation, and strategic roadmap of an enterprise AI delivery platform on Microsoft Azure — built with deliberate choices at every layer.</p>
+    <div class="cover-pills">
+      <span class="pill done">Landing Zone · Delivered</span>
+      <span class="pill done">CI/CD · GitHub Actions · Delivered</span>
+      <span class="pill done">AI Foundry · Full Infrastructure · Delivered</span>
+      <span class="pill done">ML Workspace & MLOps · Delivered</span>
+      <span class="pill road">GenAI Microservices · Phase 2</span>
+      <span class="pill road">Automated Promotion · Phase 2</span>
+    </div>
+    <div class="cover-meta">
+      <div class="meta-item"><span class="meta-lbl">Track</span><span class="meta-val">Azure AI Platform</span></div>
+      <div class="meta-item"><span class="meta-lbl">IaC</span><span class="meta-val">Terraform · AVM Modules</span></div>
+      <div class="meta-item"><span class="meta-lbl">Version</span><span class="meta-val">1.0 · 2026</span></div>
+      <div class="meta-item"><span class="meta-lbl">Classification</span><span class="meta-val">DataGrokr Confidential</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ BODY ═══ -->
+<div class="page">
+
+<!-- TOC -->
+<div class="toc-wrap">
+  <p class="toc-eye">— Contents</p>
+  <div class="toc-grid">
+    <a href="#exec" class="toc-item"><span class="toc-num">00</span><div><div class="toc-title">Executive Summary</div><div class="toc-sub">Scope, decisions & delivery status</div></div></a>
+    <a href="#ch1" class="toc-item"><span class="toc-num">01</span><div><div class="toc-title">Bootstrap & Landing Zone</div><div class="toc-sub">ALZ Accelerator · AVM · Multi-region hub-spoke</div></div><span class="toc-badge done">✓ Built</span></a>
+    <a href="#ch2" class="toc-item"><span class="toc-num">02</span><div><div class="toc-title">CI/CD Pipeline</div><div class="toc-sub">GitHub Actions · OIDC · Terraform automation</div></div><span class="toc-badge done">✓ Built</span></a>
+    <a href="#ch3" class="toc-item"><span class="toc-num">03</span><div><div class="toc-title">AI Foundry & GenAI Infrastructure</div><div class="toc-sub">AVM ai-ml module · Full dependency stack · Container App Environment</div></div><span class="toc-badge done">✓ Built</span></a>
+    <a href="#ch4" class="toc-item"><span class="toc-num">04</span><div><div class="toc-title">ML Workspace & MLOps Pipeline</div><div class="toc-sub">Custom Terraform · Event-driven retraining · Governed promotion</div></div><span class="toc-badge done">✓ Built</span></a>
+    <a href="#challenges" class="toc-item"><span class="toc-num">05</span><div><div class="toc-title">Challenges & Roadmap</div><div class="toc-sub">Mitigations, best practices & Phase 2</div></div><span class="toc-badge road">Phase 2</span></a>
+  </div>
+</div>
+
+
+<!-- ═══ 00 EXEC SUMMARY ═══ -->
+<div id="exec" class="sec">
+  <div class="sec-rule"></div>
+  <p class="sec-kick">00 — Executive Summary</p>
+  <h2 class="sec-h">What We Built<br><em>& the Decisions Behind It</em></h2>
+  <p class="sec-lead">This is not a theoretical reference architecture. Every layer described in this paper has been built and is operational. More importantly, every non-standard choice was made deliberately — balancing speed of delivery, operational pragmatism, and long-term governance.</p>
+
+  <div class="prose">
+    <p>The <strong>Cloud-Agnostic AI Platform (CAAP)</strong> on Azure is designed around a foundational principle: AI infrastructure should be governed, reproducible, and portable. On Azure, this is realised through four layers — a policy-governed landing zone, a credential-free CI/CD pipeline, a fully provisioned AI Foundry infrastructure, and a semi-automated MLOps pipeline built on Azure ML.</p>
+    <p>Where industry convention might demand full automation, we made <strong>deliberate, informed choices</strong> to introduce human governance at the right points — specifically around model promotion to production. This reflects mature ML engineering thinking, not a limitation of the platform. The infrastructure to go further is already in place.</p>
+  </div>
+
+  <div class="pillar-row">
+    <div class="pillar"><div class="pillar-n">01</div><div class="pillar-title">Governed by Default</div><div class="pillar-text">ALZ Accelerator with AVM modules. Policy, network security, and cost isolation inherited by every workload from day zero.</div></div>
+    <div class="pillar"><div class="pillar-n">02</div><div class="pillar-title">Zero-Credential CI/CD</div><div class="pillar-text">OIDC Workload Identity Federation. No client secrets exist anywhere in the pipeline — not in GitHub, not in environment variables.</div></div>
+    <div class="pillar"><div class="pillar-n">03</div><div class="pillar-title">Full AI Stack Provisioned</div><div class="pillar-text">AI Foundry, Agent Service, APIM, App Gateway, Container App Environment — the complete GenAI infrastructure substrate.</div></div>
+    <div class="pillar"><div class="pillar-n">04</div><div class="pillar-title">Event-Driven MLOps</div><div class="pillar-text">Drift signals → Event Grid → Function App → Batch Endpoint. Retraining is automated. Promotion is deliberately human-gated.</div></div>
+  </div>
+
+  <table class="data-table">
+    <thead><tr><th>Layer</th><th>Component</th><th>Technology</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Bootstrap</strong></td><td>Landing Zone — multi-region hub-spoke</td><td>ALZ Accelerator + AVM pattern modules</td><td><span class="st-done">✓ Delivered</span></td></tr>
+      <tr><td><strong>CI/CD</strong></td><td>Terraform pipeline — zero-credential auth</td><td>GitHub Actions + OIDC Workload Identity</td><td><span class="st-done">✓ Delivered</span></td></tr>
+      <tr><td><strong>AI Platform</strong></td><td>AI Foundry + Agent Service + APIM + App GW + Container App Env</td><td>AVM ai-ml pattern module</td><td><span class="st-done">✓ Delivered</span></td></tr>
+      <tr><td><strong>ML Platform</strong></td><td>ML Workspace — Allow Internet Outbound + private backing resources</td><td>Custom Terraform</td><td><span class="st-done">✓ Delivered</span></td></tr>
+      <tr><td><strong>MLOps</strong></td><td>Event-driven retraining + human-gated promotion</td><td>Azure ML Pipelines + Event Grid + Function App + Batch Endpoint</td><td><span class="st-done">✓ Delivered</span></td></tr>
+      <tr><td><strong>GenAI Apps</strong></td><td>Microservices in Container App Environment</td><td>Dapr · Orchestrator · MCP · Ingestion (team-deployed)</td><td><span class="st-road">◐ Phase 2</span></td></tr>
+      <tr><td><strong>Promotion Gate</strong></td><td>Fully automated model promotion pipeline</td><td>Planned: ML SDK + GitHub Actions</td><td><span class="st-road">◐ Phase 2</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<!-- ═══ 01 BOOTSTRAP ═══ -->
+<div id="ch1" class="sec">
+  <div class="sec-rule"></div>
+  <p class="sec-kick">01 — Bootstrap & Landing Zone</p>
+  <h2 class="sec-h">Foundation:<br><em>Azure Landing Zone at Enterprise Scale</em></h2>
+  <p class="sec-lead">The landing zone is the non-negotiable starting point. Getting it right means every workload, every team, and every AI service inherits security, governance, and network segmentation without any per-team configuration.</p>
+  <span class="ch-status built">Delivered — ALZ Accelerator · Azure Verified Modules</span>
+
+  <div class="prose">
+    <h3>1.1 Why Azure Landing Zone Accelerator with AVM</h3>
+    <p>Rather than engineering a bespoke Management Group hierarchy and policy framework from scratch, we adopted the <strong>Azure Landing Zone Accelerator</strong> implemented entirely through <strong>Azure Verified Modules (AVM)</strong> — Microsoft's officially maintained, semantically versioned Terraform module library. This was a deliberate architectural choice that delivered three compounding benefits.</p>
+    <p>First, it eliminated months of foundational design work while giving us a governance framework battle-tested across thousands of enterprise deployments. Second, AVM modules receive upstream security improvements and new Azure feature support — our landing zone improves without us maintaining the underlying module code. Third, the consistent AVM module interface design means our Azure implementation documents cleanly alongside equivalent AWS and GCP implementations in future tracks.</p>
+
+    <h3>1.2 Multi-Region Hub-Spoke Topology</h3>
+    <p>The network follows a <strong>hub-spoke model deployed across two Azure regions</strong>. A dedicated Connectivity subscription hosts the hub VNet in each region containing Azure Firewall, Azure DDoS Protection, Azure DNS Private Resolver, VPN/ExpressRoute Gateways, and centralised Private DNS Zones. All spoke VNets peer to the regional hub, with all egress routing enforced through Azure Firewall policies.</p>
+    <p>This topology is fundamental for the AI Platform spoke: Azure AI Foundry, APIM, Azure ML, and all backing services are accessed exclusively via <strong>Private Endpoints</strong> within the spoke network. DNS resolution for all private endpoints flows through the hub's centralised Private DNS Resolver — ensuring consistent name resolution across all spokes and future on-premises connectivity via ExpressRoute.</p>
+  </div>
+
+  <div class="arch-wrap">
+    <div class="arch-head">
+      <span class="arch-lbl">Diagram 01 — Multi-Region Landing Zone & Hub-Spoke Network</span>
+      <span class="arch-tag">AVM · ALZ Accelerator</span>
+    </div>
+    <div class="arch-body">
+      <svg viewBox="0 0 880 480" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:'JetBrains Mono',monospace">
+        <defs>
+          <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#1a56db" opacity=".6"/></marker>
+        </defs>
+        <!-- MG Hierarchy -->
+        <text x="440" y="22" text-anchor="middle" fill="#6b748a" font-size="9" letter-spacing="1.5">MANAGEMENT GROUP HIERARCHY (ALZ ACCELERATOR)</text>
+        <rect x="320" y="30" width="200" height="34" rx="3" fill="none" stroke="#1a56db" stroke-width="1.5" stroke-opacity=".5"/>
+        <text x="420" y="48" text-anchor="middle" fill="#1a56db" font-size="9">Org Root MG</text>
+        <text x="420" y="60" text-anchor="middle" fill="#6b748a" font-size="7.5">caap-tenant-root</text>
+        <line x1="420" y1="64" x2="420" y2="82" stroke="#1a56db" stroke-opacity=".25" stroke-dasharray="4,3"/>
+        <line x1="200" y1="82" x2="680" y2="82" stroke="#1a56db" stroke-opacity=".15" stroke-dasharray="4,3"/>
+        <!-- MGs row -->
+        <rect x="120" y="82" width="155" height="32" rx="3" fill="none" stroke="#1a56db" stroke-opacity=".35" stroke-width="1.2"/>
+        <text x="197" y="100" text-anchor="middle" fill="#1a56db" font-size="8.5">Platform MG</text>
+        <text x="197" y="110" text-anchor="middle" fill="#6b748a" font-size="7">Connectivity · Identity · Mgmt</text>
+        <rect x="292" y="82" width="155" height="32" rx="3" fill="none" stroke="#0e7490" stroke-opacity=".4" stroke-width="1.2"/>
+        <text x="369" y="100" text-anchor="middle" fill="#0e7490" font-size="8.5">Application Landing Zones</text>
+        <text x="369" y="110" text-anchor="middle" fill="#6b748a" font-size="7">Corp · AI · Data workloads</text>
+        <rect x="466" y="82" width="155" height="32" rx="3" fill="none" stroke="#0e7490" stroke-opacity=".35" stroke-width="1.2"/>
+        <text x="543" y="100" text-anchor="middle" fill="#0e7490" font-size="8.5">AI Platform Sub</text>
+        <text x="543" y="110" text-anchor="middle" fill="#6b748a" font-size="7">Non-Prod · Prod subscriptions</text>
+        <rect x="634" y="82" width="155" height="32" rx="3" fill="none" stroke="#6d28d9" stroke-opacity=".3" stroke-width="1.2"/>
+        <text x="711" y="100" text-anchor="middle" fill="#6d28d9" font-size="8.5">Sandbox MG</text>
+        <text x="711" y="110" text-anchor="middle" fill="#6b748a" font-size="7">Dev experimentation</text>
+        <!-- Lines from root to MGs -->
+        <line x1="197" y1="82" x2="197" y2="82" stroke="#1a56db" stroke-opacity=".2" stroke-dasharray="3,3"/>
+        <line x1="197" y1="64" x2="197" y2="82" stroke="#1a56db" stroke-opacity=".2" stroke-dasharray="3,3"/>
+        <line x1="369" y1="64" x2="369" y2="82" stroke="#0e7490" stroke-opacity=".2" stroke-dasharray="3,3"/>
+        <line x1="543" y1="64" x2="543" y2="82" stroke="#0e7490" stroke-opacity=".2" stroke-dasharray="3,3"/>
+        <line x1="711" y1="64" x2="711" y2="82" stroke="#6d28d9" stroke-opacity=".2" stroke-dasharray="3,3"/>
+
+        <!-- Primary Hub -->
+        <rect x="20" y="140" width="220" height="200" rx="6" fill="none" stroke="#1a56db" stroke-width="1.5" stroke-opacity=".25" stroke-dasharray="6,4"/>
+        <text x="130" y="158" text-anchor="middle" fill="#1a56db" font-size="8" letter-spacing="1" opacity=".7">HUB — PRIMARY REGION</text>
+        <text x="130" y="170" text-anchor="middle" fill="#6b748a" font-size="7.5">Connectivity Subscription</text>
+        <rect x="34" y="178" width="190" height="16" rx="2" fill="#1a56db" fill-opacity=".05" stroke="#1a56db" stroke-opacity=".15" stroke-width="1"/>
+        <text x="129" y="190" text-anchor="middle" fill="#6b748a" font-size="7">Azure DDoS Protection</text>
+        <rect x="34" y="198" width="190" height="16" rx="2" fill="#1a56db" fill-opacity=".05" stroke="#1a56db" stroke-opacity=".15" stroke-width="1"/>
+        <text x="129" y="210" text-anchor="middle" fill="#6b748a" font-size="7">Azure DNS Private Resolver</text>
+        <rect x="34" y="218" width="190" height="16" rx="2" fill="#1a56db" fill-opacity=".05" stroke="#1a56db" stroke-opacity=".15" stroke-width="1"/>
+        <text x="129" y="230" text-anchor="middle" fill="#6b748a" font-size="7">Azure Firewall + Policies</text>
+        <rect x="34" y="238" width="190" height="16" rx="2" fill="#1a56db" fill-opacity=".05" stroke="#1a56db" stroke-opacity=".15" stroke-width="1"/>
+        <text x="129" y="250" text-anchor="middle" fill="#6b748a" font-size="7">VPN / ExpressRoute Gateways</text>
+        <rect x="34" y="258" width="190" height="16" rx="2" fill="#1a56db" fill-opacity=".05" stroke="#1a56db" stroke-opacity=".15" stroke-width="1"/>
+        <text x="129" y="270" text-anchor="middle" fill="#6b748a" font-size="7">Private DNS Zones (hub-owned)</text>
+        <rect x="34" y="278" width="190" height="16" rx="2" fill="#1a56db" fill-opacity=".05" stroke="#1a56db" stroke-opacity=".15" stroke-width="1"/>
+        <text x="129" y="290" text-anchor="middle" fill="#6b748a" font-size="7">Azure Bastion</text>
+        <text x="130" y="325" text-anchor="middle" fill="#6b748a" font-size="7">Hub VNet Region 1</text>
+
+        <!-- AI Platform Spoke -->
+        <rect x="260" y="140" width="350" height="200" rx="6" fill="none" stroke="#0e7490" stroke-width="1.5" stroke-opacity=".25" stroke-dasharray="6,4"/>
+        <text x="435" y="158" text-anchor="middle" fill="#0e7490" font-size="8" letter-spacing="1" opacity=".7">AI PLATFORM SPOKE — PROD SUBSCRIPTION</text>
+        <text x="435" y="170" text-anchor="middle" fill="#6b748a" font-size="7.5">AI Services Virtual Network (region 1)</text>
+        <rect x="274" y="178" width="148" height="50" rx="3" fill="#0e7490" fill-opacity=".05" stroke="#0e7490" stroke-opacity=".2" stroke-width="1"/>
+        <text x="348" y="197" text-anchor="middle" fill="#0e7490" font-size="8">Private Endpoints Subnet</text>
+        <text x="348" y="210" text-anchor="middle" fill="#6b748a" font-size="7">All AI services — no public</text>
+        <text x="348" y="222" text-anchor="middle" fill="#6b748a" font-size="7">endpoints in production</text>
+        <rect x="430" y="178" width="168" height="50" rx="3" fill="#0e7490" fill-opacity=".05" stroke="#0e7490" stroke-opacity=".2" stroke-width="1"/>
+        <text x="514" y="197" text-anchor="middle" fill="#0e7490" font-size="8">APIM + App Gateway Subnets</text>
+        <text x="514" y="210" text-anchor="middle" fill="#6b748a" font-size="7">API Management + WAF</text>
+        <text x="514" y="222" text-anchor="middle" fill="#6b748a" font-size="7">Public ingress (UDR → FW)</text>
+        <rect x="274" y="236" width="148" height="50" rx="3" fill="#0e7490" fill-opacity=".05" stroke="#0e7490" stroke-opacity=".2" stroke-width="1"/>
+        <text x="348" y="255" text-anchor="middle" fill="#0e7490" font-size="8">AI Foundry Agent Subnet</text>
+        <text x="348" y="268" text-anchor="middle" fill="#6b748a" font-size="7">AI Foundry Agent Service</text>
+        <text x="348" y="280" text-anchor="middle" fill="#6b748a" font-size="7">Build Agent VM</text>
+        <rect x="430" y="236" width="168" height="50" rx="3" fill="#047857" fill-opacity=".05" stroke="#047857" stroke-opacity=".2" stroke-width="1"/>
+        <text x="514" y="255" text-anchor="middle" fill="#047857" font-size="8">Container App Env Subnet</text>
+        <text x="514" y="268" text-anchor="middle" fill="#6b748a" font-size="7">GenAI microservices runtime</text>
+        <text x="514" y="280" text-anchor="middle" fill="#6b748a" font-size="7">(env ready · apps Phase 2)</text>
+        <!-- Jump box subnet -->
+        <rect x="274" y="295" width="324" height="30" rx="3" fill="#6b748a" fill-opacity=".04" stroke="#6b748a" stroke-opacity=".15" stroke-width="1"/>
+        <text x="436" y="314" text-anchor="middle" fill="#6b748a" font-size="7.5">Jump Box Subnet — admin access without public exposure</text>
+
+        <!-- VNet peering arrow -->
+        <line x1="240" y1="240" x2="260" y2="240" stroke="#1a56db" stroke-width="1.5" stroke-opacity=".5" marker-end="url(#arr)"/>
+        <text x="250" y="232" text-anchor="middle" fill="#6b748a" font-size="7">VNet</text>
+        <text x="250" y="242" text-anchor="middle" fill="#6b748a" font-size="7">peering</text>
+
+        <!-- DR Hub -->
+        <rect x="640" y="140" width="220" height="200" rx="6" fill="none" stroke="#047857" stroke-width="1.5" stroke-opacity=".25" stroke-dasharray="6,4"/>
+        <text x="750" y="158" text-anchor="middle" fill="#047857" font-size="8" letter-spacing="1" opacity=".7">HUB — DR REGION</text>
+        <text x="750" y="170" text-anchor="middle" fill="#6b748a" font-size="7.5">Connectivity Subscription (DR)</text>
+        <rect x="654" y="178" width="190" height="16" rx="2" fill="#047857" fill-opacity=".04" stroke="#047857" stroke-opacity=".15" stroke-width="1"/>
+        <text x="749" y="190" text-anchor="middle" fill="#6b748a" font-size="7">Azure DNS Private Resolver</text>
+        <rect x="654" y="198" width="190" height="16" rx="2" fill="#047857" fill-opacity=".04" stroke="#047857" stroke-opacity=".15" stroke-width="1"/>
+        <text x="749" y="210" text-anchor="middle" fill="#6b748a" font-size="7">Azure Firewall + Policies</text>
+        <rect x="654" y="218" width="190" height="16" rx="2" fill="#047857" fill-opacity=".04" stroke="#047857" stroke-opacity=".15" stroke-width="1"/>
+        <text x="749" y="230" text-anchor="middle" fill="#6b748a" font-size="7">VPN / ExpressRoute Gateways</text>
+        <rect x="654" y="238" width="190" height="16" rx="2" fill="#047857" fill-opacity=".04" stroke="#047857" stroke-opacity=".15" stroke-width="1"/>
+        <text x="749" y="250" text-anchor="middle" fill="#6b748a" font-size="7">Private DNS Zones (replicated)</text>
+        <text x="750" y="325" text-anchor="middle" fill="#6b748a" font-size="7">Hub VNet Region N</text>
+
+        <!-- Global peering -->
+        <line x1="610" y1="240" x2="640" y2="240" stroke="#b45309" stroke-width="1.5" stroke-dasharray="5,3" stroke-opacity=".6" marker-end="url(#arr)"/>
+        <text x="625" y="232" text-anchor="middle" fill="#b45309" font-size="7">Global</text>
+        <text x="625" y="242" text-anchor="middle" fill="#b45309" font-size="7">Peering</text>
+
+        <!-- Policy banner -->
+        <rect x="20" y="360" width="840" height="28" rx="4" fill="#1a56db" fill-opacity=".04" stroke="#1a56db" stroke-opacity=".12" stroke-width="1"/>
+        <text x="440" y="378" text-anchor="middle" fill="#1a56db" font-size="8.5" opacity=".75">Azure Policy Initiative (inherited from ALZ) · CIS Benchmark · Custom AI Controls · Subscription Policy · Defender for Cloud · Purview</text>
+
+        <!-- On-prem -->
+        <rect x="20" y="400" width="840" height="28" rx="4" fill="#6d28d9" fill-opacity=".03" stroke="#6d28d9" stroke-opacity=".15" stroke-width="1"/>
+        <text x="440" y="418" text-anchor="middle" fill="#6d28d9" font-size="8.5" opacity=".7">On-Premises Network · ExpressRoute / VPN Gateway ready via hub · Azure Bastion for admin access</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="prose">
+    <h3>1.3 Key Best Practice Decisions</h3>
+    <p><strong>Private DNS centralisation in the hub</strong> is enforced via Terraform output references — the AI Platform spoke module receives hub DNS Zone IDs as inputs and all Private Endpoint DNS registrations target hub zones exclusively. This prevents the common split-brain DNS problem where spokes create their own zones and break cross-spoke resolution.</p>
+    <p><strong>Azure Policy deny effects</strong> are inherited from the ALZ initiative and block manual resource creation in production subscriptions. Combined with Azure Locks on critical resources (Terraform state storage, Key Vaults), this makes the infrastructure resistant to configuration drift without relying on team discipline.</p>
+  </div>
+
+  <div class="callout success">
+    <div class="callout-icon">✓</div>
+    <div class="callout-body">
+      <div class="callout-title">Best Practice — Validated</div>
+      <p>All PaaS services in the AI Platform subscription are accessible only via Private Endpoints. Azure Policy <code>deny</code> effect — inherited from the ALZ initiative — blocks any attempt to create public-facing resources in production. This is platform-enforced, not convention-enforced.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ 02 CI/CD ═══ -->
+<div id="ch2" class="sec">
+  <div class="sec-rule"></div>
+  <p class="sec-kick">02 — CI/CD Pipeline</p>
+  <h2 class="sec-h">Automation:<br><em>Credential-Free Infrastructure Delivery</em></h2>
+  <p class="sec-lead">Every infrastructure change is version-controlled, reviewed, and auditable. No manual Azure portal changes. No long-lived credentials anywhere in the system. This is a non-negotiable baseline for a platform that manages AI infrastructure at scale.</p>
+  <span class="ch-status built">Delivered — GitHub Actions + OIDC Workload Identity Federation</span>
+
+  <div class="prose">
+    <h3>2.1 OIDC Workload Identity — Why This Matters</h3>
+    <p>The most consequential security decision in the CI/CD design is authentication. GitHub Actions pipelines authenticate to Azure using <strong>OIDC Workload Identity Federation</strong>, eliminating client secrets, certificates, and passwords entirely. This is the current industry best practice for IaC pipeline authentication — and it is implemented here from day one rather than retrofitted.</p>
+    <p>The trust relationship is established at the Azure AD Application level. GitHub's OIDC issuer is federated to an Azure service principal scoped to the minimum required permissions. Each pipeline run receives a short-lived token valid only for that run's duration. Exposed pipeline logs cannot leak reusable credentials because none exist.</p>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-top"><span class="code-file">.github/workflows/platform.yml — auth block</span><span class="code-ltag">GitHub Actions</span></div>
+    <div class="code-body"><pre><span class="cc"># No secrets — OIDC token issued at runtime per workflow run</span>
+<span class="ct">permissions</span>:
+  <span class="ck">id-token</span>: <span class="cs">write</span>    <span class="cc"># Required to request OIDC token</span>
+  <span class="ck">contents</span>: <span class="cs">read</span>
+
+<span class="ct">jobs</span>:
+  <span class="ck">terraform</span>:
+    <span class="ck">environment</span>: <span class="cs">production</span>   <span class="cc"># Approval gate enforced at env level</span>
+    <span class="ck">steps</span>:
+      - <span class="ck">uses</span>: <span class="cs">azure/login@v2</span>
+        <span class="ck">with</span>:
+          <span class="ck">client-id</span>:       <span class="cs">${{ vars.AZURE_CLIENT_ID }}</span>
+          <span class="ck">tenant-id</span>:       <span class="cs">${{ vars.AZURE_TENANT_ID }}</span>
+          <span class="ck">subscription-id</span>: <span class="cs">${{ vars.AZURE_SUBSCRIPTION_ID }}</span>
+          <span class="cc"># ↑ Non-secret variable IDs — not credentials</span>
+
+      - <span class="ck">run</span>: <span class="cs">terraform init -backend-config="use_oidc=true"</span>
+      - <span class="ck">run</span>: <span class="cs">terraform apply -auto-approve tfplan.out</span>
+        <span class="cc"># ↑ Only runs against pre-approved, hash-verified plan artifact</span></pre></div>
+  </div>
+
+  <div class="flow-steps">
+    <div class="flow-step"><div class="flow-num">01</div><div class="flow-content"><div class="flow-tag setup">PR trigger</div><h5>Lint & Security Scan</h5><p><code>terraform fmt -check</code>, <code>tflint</code> with AzureRM ruleset, and <code>checkov</code> static analysis on every pull request. Custom Checkov policies enforce AI-specific controls — content filters must be enabled on all Azure OpenAI deployments, Key Vaults must have soft-delete and purge protection. Failures block merge unconditionally.</p></div></div>
+    <div class="flow-step"><div class="flow-num">02</div><div class="flow-content"><div class="flow-tag auto">automated</div><h5>Terraform Plan + Artifact</h5><p>Plan runs against the target environment. The plan artifact is saved to Azure Blob Storage (same account as Terraform state, same RBAC boundary) and its SHA-256 hash is recorded. This is the foundation of plan integrity — the hash is verified before apply, preventing any modification between review and execution.</p></div></div>
+    <div class="flow-step"><div class="flow-num">03</div><div class="flow-content"><div class="flow-tag human">human gate</div><h5>Approval Gate — GitHub Environments</h5><p>Production deployments require explicit approval from a Platform Engineer via GitHub Environments. The approval record is permanently stored in GitHub's audit log. Non-production environments auto-apply after a clean plan — a deliberate choice to keep dev iteration fast while protecting production.</p></div></div>
+    <div class="flow-step"><div class="flow-num">04</div><div class="flow-content"><div class="flow-tag auto">automated</div><h5>Apply & Smoke Test</h5><p>The hash-verified plan artifact is applied. Post-apply smoke tests verify key resources are in a healthy provisioning state. Failures trigger an automatic rollback notification with the full state diff. Terraform state is stored in Azure Blob Storage and accessed exclusively via OIDC — no human has standing access to production state files.</p></div></div>
+  </div>
+
+  <div class="decision">
+    <div class="decision-label">Architectural Decision — Confirmed Best Practice</div>
+    <h5>Plan artifact integrity verification</h5>
+    <p>Saving the Terraform plan as a verified artifact and checking its hash before apply closes a subtle but real attack vector: the plan-to-apply drift attack, where infrastructure changes between the reviewed plan and the execution. This pattern is recommended in the HashiCorp Terraform security model and is implemented here from the start.</p>
+  </div>
+</div>
+
+
+<!-- ═══ 03 AI FOUNDRY ═══ -->
+<div id="ch3" class="sec">
+  <div class="sec-rule"></div>
+  <p class="sec-kick">03 — AI Foundry & GenAI Infrastructure</p>
+  <h2 class="sec-h">AI Platform:<br><em>Full Infrastructure Substrate via AVM</em></h2>
+  <p class="sec-lead">The AVM ai-ml pattern module provisions the complete governed infrastructure foundation for all AI and GenAI workloads. This is not a partial deployment — it is the full dependency stack, fully private, fully policy-compliant, and ready for application teams to build on top of.</p>
+  <span class="ch-status built">Delivered — AVM ai-ml Pattern Module</span>
+
+  <div class="prose">
+    <h3>3.1 What the AVM ai-ml Pattern Module Deploys</h3>
+    <p>The module follows a clear and deliberate philosophy: <strong>provision the governed platform substrate, not the applications</strong>. Every AI service dependency, every Private Endpoint, every network subnet, every identity binding — all provisioned as code through the AVM module. Application workloads are brought by teams on top of this foundation, through the same CI/CD pipeline.</p>
+    <p>This separation is architecturally significant. It means the platform team can upgrade, patch, and govern the AI infrastructure independently of application teams — and application teams can deploy and iterate within well-defined boundaries without needing to understand or modify the underlying platform.</p>
+  </div>
+
+  <table class="data-table">
+    <thead><tr><th>Resource</th><th>Purpose</th><th>Connectivity</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Azure AI Foundry Service</strong></td><td>Central AI control plane — model access, connections, governance</td><td>Private Endpoint</td></tr>
+      <tr><td><strong>AI Foundry Project</strong></td><td>Team-scoped workspace within Foundry — isolated experiments, deployments</td><td>Inherits Hub connections</td></tr>
+      <tr><td><strong>AI Foundry Agent Service</strong></td><td>Agentic AI runtime infrastructure — multi-step reasoning capability</td><td>Dedicated subnet · Private</td></tr>
+      <tr><td><strong>Storage Account</strong></td><td>AI artefacts, datasets, model outputs, grounding data</td><td>Private Endpoint</td></tr>
+      <tr><td><strong>Azure AI Search</strong></td><td>Semantic + hybrid search for RAG and knowledge grounding patterns</td><td>Private Endpoint</td></tr>
+      <tr><td><strong>Cosmos DB</strong></td><td>Agent state, memory, session data for agentic workflows</td><td>Private Endpoint</td></tr>
+      <tr><td><strong>Key Vault</strong></td><td>Secrets, API keys, customer-managed encryption keys</td><td>Private Endpoint</td></tr>
+      <tr><td><strong>API Management</strong></td><td>AI API gateway — rate limiting, policy enforcement, developer portal</td><td>Dedicated APIM subnet</td></tr>
+      <tr><td><strong>Application Gateway + WAF</strong></td><td>Public ingress with WAF v2, UDR routing egress back through Azure Firewall</td><td>Dedicated AGW subnet</td></tr>
+      <tr><td><strong>Container App Environment</strong></td><td>Governed runtime for GenAI microservices — provisioned empty, apps team-deployed</td><td>Dedicated subnet · Private</td></tr>
+      <tr><td><strong>Container Registry</strong></td><td>Private OCI image registry for application containers</td><td>Private Endpoint</td></tr>
+      <tr><td><strong>App Configuration</strong></td><td>Centralised feature flags and runtime configuration for AI apps</td><td>Private Endpoint</td></tr>
+      <tr><td><strong>Jump Box VM</strong></td><td>Secure admin access path without Bastion cost overhead</td><td>Dedicated jump box subnet</td></tr>
+      <tr><td><strong>Build Agent VM</strong></td><td>Private CI/CD build agent within the VNet for pipeline jobs</td><td>Dedicated build subnet</td></tr>
+      <tr><td><strong>Managed Identities</strong></td><td>Workload identity for all service-to-service authentication — no passwords</td><td>N/A — identity plane</td></tr>
+      <tr><td><strong>App Insights + Log Analytics</strong></td><td>Application monitoring, diagnostic settings, network watcher</td><td>Private Endpoint</td></tr>
+    </tbody>
+  </table>
+
+  <div class="arch-wrap">
+    <div class="arch-head">
+      <span class="arch-lbl">Diagram 03 — AI Foundry & GenAI Infrastructure (AVM ai-ml module)</span>
+      <span class="arch-tag">Full Dependency Stack · Private Networking</span>
+    </div>
+    <div class="arch-body">
+      <svg viewBox="0 0 880 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:'JetBrains Mono',monospace">
+
+        <!-- Outer subscription boundary -->
+        <rect x="10" y="10" width="860" height="475" rx="8" fill="none" stroke="#0e7490" stroke-opacity=".15" stroke-width="1.5" stroke-dasharray="7,4"/>
+        <text x="440" y="28" text-anchor="middle" fill="#0e7490" font-size="8.5" letter-spacing="1.5" opacity=".65">AI PLATFORM SUBSCRIPTION — ALL SERVICES PRIVATE · AVM ai-ml PATTERN MODULE</text>
+
+        <!-- Users/Internet ingress (right) -->
+        <rect x="790" y="180" width="68" height="40" rx="3" fill="none" stroke="#6b748a" stroke-opacity=".3" stroke-width="1"/>
+        <text x="824" y="197" text-anchor="middle" fill="#6b748a" font-size="8.5">App Users</text>
+        <text x="824" y="209" text-anchor="middle" fill="#6b748a" font-size="7">Internet</text>
+        <line x1="790" y1="200" x2="762" y2="200" stroke="#6b748a" stroke-width="1.5" stroke-opacity=".4" marker-end="url(#arr)"/>
+
+        <!-- App Gateway + WAF -->
+        <rect x="700" y="170" width="90" height="60" rx="3" fill="#c0392b" fill-opacity=".05" stroke="#c0392b" stroke-opacity=".3" stroke-width="1.5"/>
+        <text x="745" y="193" text-anchor="middle" fill="#c0392b" font-size="8.5">App Gateway</text>
+        <text x="745" y="207" text-anchor="middle" fill="#6b748a" font-size="7.5">WAF v2</text>
+        <text x="745" y="219" text-anchor="middle" fill="#6b748a" font-size="7">AGW subnet</text>
+        <line x1="700" y1="200" x2="670" y2="200" stroke="#1a56db" stroke-width="1.5" stroke-opacity=".4" marker-end="url(#arr)"/>
+
+        <!-- APIM -->
+        <rect x="590" y="170" width="80" height="60" rx="3" fill="#1a56db" fill-opacity=".05" stroke="#1a56db" stroke-opacity=".3" stroke-width="1.5"/>
+        <text x="630" y="193" text-anchor="middle" fill="#1a56db" font-size="8.5">API Mgmt</text>
+        <text x="630" y="207" text-anchor="middle" fill="#6b748a" font-size="7.5">AI API Gateway</text>
+        <text x="630" y="219" text-anchor="middle" fill="#6b748a" font-size="7">APIM subnet</text>
+        <line x1="590" y1="200" x2="555" y2="200" stroke="#1a56db" stroke-width="1.5" stroke-opacity=".4" marker-end="url(#arr)"/>
+
+        <!-- AI Foundry Service block -->
+        <rect x="320" y="42" width="360" height="130" rx="5" fill="#0e7490" fill-opacity=".04" stroke="#0e7490" stroke-opacity=".3" stroke-width="1.5"/>
+        <text x="500" y="62" text-anchor="middle" fill="#0e7490" font-size="9.5" font-weight="500">Azure AI Foundry Service</text>
+        <text x="500" y="76" text-anchor="middle" fill="#6b748a" font-size="7.5">Central AI control plane · Managed Identities · Role Assignments</text>
+        <!-- Foundry internals -->
+        <rect x="334" y="84" width="155" height="76" rx="3" fill="#0e7490" fill-opacity=".05" stroke="#0e7490" stroke-opacity=".2" stroke-width="1"/>
+        <text x="411" y="101" text-anchor="middle" fill="#0e7490" font-size="8.5">AI Foundry Project</text>
+        <text x="411" y="115" text-anchor="middle" fill="#6b748a" font-size="7">AI Services endpoints</text>
+        <text x="411" y="127" text-anchor="middle" fill="#6b748a" font-size="7">Foundry models</text>
+        <text x="411" y="139" text-anchor="middle" fill="#6b748a" font-size="7">Connections · Foundry Agent Svc</text>
+        <text x="411" y="152" text-anchor="middle" fill="#6b748a" font-size="7">Private Endpoint ✓</text>
+        <rect x="498" y="84" width="170" height="76" rx="3" fill="#6d28d9" fill-opacity=".05" stroke="#6d28d9" stroke-opacity=".2" stroke-width="1"/>
+        <text x="583" y="101" text-anchor="middle" fill="#6d28d9" font-size="8.5">AI Foundry Agent Service</text>
+        <text x="583" y="115" text-anchor="middle" fill="#6b748a" font-size="7">Agentic AI runtime</text>
+        <text x="583" y="127" text-anchor="middle" fill="#6b748a" font-size="7">Multi-step reasoning infra</text>
+        <text x="583" y="139" text-anchor="middle" fill="#6b748a" font-size="7">Dedicated Agent subnet</text>
+        <text x="583" y="152" text-anchor="middle" fill="#6b748a" font-size="7">Managed Identity auth</text>
+
+        <!-- AI Foundry Dependencies row -->
+        <text x="195" y="50" text-anchor="middle" fill="#0e7490" font-size="8.5" opacity=".7">AI Foundry Agent Service Dependencies</text>
+        <rect x="28" y="58" width="100" height="52" rx="3" fill="#0e7490" fill-opacity=".04" stroke="#0e7490" stroke-opacity=".2" stroke-width="1"/>
+        <text x="78" y="78" text-anchor="middle" fill="#0e7490" font-size="8">Storage Account</text>
+        <text x="78" y="92" text-anchor="middle" fill="#6b748a" font-size="7">Artefacts · Data</text>
+        <text x="78" y="103" text-anchor="middle" fill="#6b748a" font-size="7">Private EP ✓</text>
+        <rect x="136" y="58" width="90" height="52" rx="3" fill="#0e7490" fill-opacity=".04" stroke="#0e7490" stroke-opacity=".2" stroke-width="1"/>
+        <text x="181" y="78" text-anchor="middle" fill="#0e7490" font-size="8">AI Search</text>
+        <text x="181" y="92" text-anchor="middle" fill="#6b748a" font-size="7">RAG · Hybrid</text>
+        <text x="181" y="103" text-anchor="middle" fill="#6b748a" font-size="7">Private EP ✓</text>
+        <rect x="234" y="58" width="80" height="52" rx="3" fill="#0e7490" fill-opacity=".04" stroke="#0e7490" stroke-opacity=".2" stroke-width="1"/>
+        <text x="274" y="78" text-anchor="middle" fill="#0e7490" font-size="8">Cosmos DB</text>
+        <text x="274" y="92" text-anchor="middle" fill="#6b748a" font-size="7">Agent state</text>
+        <text x="274" y="103" text-anchor="middle" fill="#6b748a" font-size="7">Private EP ✓</text>
+        <!-- Key Vault below -->
+        <rect x="28" y="118" width="286" height="26" rx="3" fill="#b45309" fill-opacity=".04" stroke="#b45309" stroke-opacity=".2" stroke-width="1"/>
+        <text x="171" y="135" text-anchor="middle" fill="#b45309" font-size="8">Key Vault — Secrets · API Keys · CMK encryption · Private Endpoint ✓</text>
+
+        <!-- Private Endpoints subnet -->
+        <rect x="28" y="160" width="560" height="60" rx="4" fill="#1a56db" fill-opacity=".03" stroke="#1a56db" stroke-opacity=".15" stroke-width="1"/>
+        <text x="308" y="178" text-anchor="middle" fill="#1a56db" font-size="8.5" opacity=".7">Private Endpoints Subnet — DNS resolves via Hub Private DNS Zones</text>
+        <!-- PE icons row -->
+        <rect x="40" y="183" width="60" height="30" rx="2" fill="#1a56db" fill-opacity=".05"/>
+        <text x="70" y="197" text-anchor="middle" fill="#6b748a" font-size="7">PE: Foundry</text>
+        <text x="70" y="208" text-anchor="middle" fill="#6b748a" font-size="7">Storage</text>
+        <rect x="108" y="183" width="60" height="30" rx="2" fill="#1a56db" fill-opacity=".05"/>
+        <text x="138" y="197" text-anchor="middle" fill="#6b748a" font-size="7">PE: AI Search</text>
+        <text x="138" y="208" text-anchor="middle" fill="#6b748a" font-size="7">Cosmos DB</text>
+        <rect x="176" y="183" width="60" height="30" rx="2" fill="#1a56db" fill-opacity=".05"/>
+        <text x="206" y="197" text-anchor="middle" fill="#6b748a" font-size="7">PE: Key Vault</text>
+        <text x="206" y="208" text-anchor="middle" fill="#6b748a" font-size="7">ACR</text>
+        <rect x="244" y="183" width="60" height="30" rx="2" fill="#1a56db" fill-opacity=".05"/>
+        <text x="274" y="197" text-anchor="middle" fill="#6b748a" font-size="7">PE: APIM</text>
+        <text x="274" y="208" text-anchor="middle" fill="#6b748a" font-size="7">App Config</text>
+        <rect x="312" y="183" width="60" height="30" rx="2" fill="#1a56db" fill-opacity=".05"/>
+        <text x="342" y="197" text-anchor="middle" fill="#6b748a" font-size="7">PE: Log</text>
+        <text x="342" y="208" text-anchor="middle" fill="#6b748a" font-size="7">Analytics</text>
+        <rect x="380" y="183" width="70" height="30" rx="2" fill="#1a56db" fill-opacity=".05"/>
+        <text x="415" y="197" text-anchor="middle" fill="#6b748a" font-size="7">PE: Agent Svc</text>
+        <text x="415" y="208" text-anchor="middle" fill="#6b748a" font-size="7">App Insights</text>
+        <rect x="458" y="183" width="120" height="30" rx="2" fill="#1a56db" fill-opacity=".05"/>
+        <text x="518" y="197" text-anchor="middle" fill="#6b748a" font-size="7">6 more Private Endpoints…</text>
+        <text x="518" y="208" text-anchor="middle" fill="#6b748a" font-size="7">all services · all private</text>
+
+        <!-- Container App Environment -->
+        <rect x="28" y="238" width="380" height="90" rx="4" fill="#047857" fill-opacity=".04" stroke="#047857" stroke-opacity=".25" stroke-width="1.5"/>
+        <text x="218" y="258" text-anchor="middle" fill="#047857" font-size="9">Container App Environment</text>
+        <text x="218" y="272" text-anchor="middle" fill="#6b748a" font-size="7.5">Provisioned empty — governed runtime for GenAI microservices</text>
+        <text x="218" y="286" text-anchor="middle" fill="#6b748a" font-size="7.5">Container Registry · App Configuration · Managed Identity bound</text>
+        <!-- Planned apps -->
+        <rect x="40" y="296" width="356" height="24" rx="2" fill="#047857" fill-opacity=".04" stroke="#047857" stroke-opacity=".15" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="218" y="312" text-anchor="middle" fill="#047857" font-size="7.5">Phase 2: Frontend · Orchestrator · MCP · Ingestion · Dapr (team-deployed into this environment)</text>
+
+        <!-- Monitoring block -->
+        <rect x="420" y="238" width="170" height="90" rx="4" fill="#b45309" fill-opacity=".04" stroke="#b45309" stroke-opacity=".2" stroke-width="1.5"/>
+        <text x="505" y="258" text-anchor="middle" fill="#b45309" font-size="9">Monitoring & Governance</text>
+        <text x="505" y="273" text-anchor="middle" fill="#6b748a" font-size="7.5">App Insights · Diagnostic Settings</text>
+        <text x="505" y="286" text-anchor="middle" fill="#6b748a" font-size="7.5">Log Analytics Workspace</text>
+        <text x="505" y="299" text-anchor="middle" fill="#6b748a" font-size="7.5">Network Watcher</text>
+        <text x="505" y="312" text-anchor="middle" fill="#6b748a" font-size="7.5">Defender for Cloud · Purview</text>
+
+        <!-- Jump/Build VMs -->
+        <rect x="600" y="238" width="178" height="90" rx="4" fill="#6b748a" fill-opacity=".04" stroke="#6b748a" stroke-opacity=".2" stroke-width="1"/>
+        <text x="689" y="258" text-anchor="middle" fill="#6b748a" font-size="9">Admin & Build</text>
+        <text x="689" y="273" text-anchor="middle" fill="#6b748a" font-size="7.5">Jump Box VM (jump subnet)</text>
+        <text x="689" y="286" text-anchor="middle" fill="#6b748a" font-size="7.5">Build Agent VM (build subnet)</text>
+        <text x="689" y="299" text-anchor="middle" fill="#6b748a" font-size="7.5">Private CI/CD runners</text>
+        <text x="689" y="312" text-anchor="middle" fill="#6b748a" font-size="7.5">No public IP</text>
+
+        <!-- Security row -->
+        <rect x="28" y="348" width="750" height="32" rx="4" fill="#6d28d9" fill-opacity=".04" stroke="#6d28d9" stroke-opacity=".15" stroke-width="1"/>
+        <text x="403" y="362" text-anchor="middle" fill="#6d28d9" font-size="8.5" opacity=".8">Security &amp; Governance · Subscription Policy Assignments · Defender for Cloud · Entra ID · Workload Policy Assignments · Tags</text>
+        <text x="403" y="374" text-anchor="middle" fill="#6b748a" font-size="7.5">Role Assignments · Managed Identities · Azure Purview · Workload Identity Federation</text>
+
+        <!-- Enterprise knowledge sources -->
+        <rect x="28" y="398" width="750" height="70" rx="4" fill="#1a56db" fill-opacity=".03" stroke="#1a56db" stroke-opacity=".12" stroke-width="1"/>
+        <text x="403" y="416" text-anchor="middle" fill="#1a56db" font-size="8.5" opacity=".7">Enterprise &amp; Knowledge Sources (Phase 2 Wiring)</text>
+        <text x="403" y="430" text-anchor="middle" fill="#6b748a" font-size="7.5">Grounding with Bing · Azure AI Search (provisioned) · Cosmos DB (provisioned)</text>
+        <text x="403" y="444" text-anchor="middle" fill="#6b748a" font-size="7.5">All infrastructure provisioned · RAG application wiring is Phase 2 team work</text>
+        <text x="403" y="458" text-anchor="middle" fill="#047857" font-size="7.5">Platform capability is ready · Application pattern is the next layer</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="decision">
+    <div class="decision-label">Architectural Decision — Platform Boundary</div>
+    <h5>Container App Environment provisioned empty — by design</h5>
+    <p>The AVM module provisions the Container App Environment with all networking, identity, and governance configuration in place but with no running applications. This is the correct platform boundary: the platform team owns the governed substrate, application teams own their workloads. It eliminates coupling between platform upgrades and application deployments, and enables multiple teams to independently deploy into the same environment under the same security posture.</p>
+  </div>
+
+  <div class="callout success">
+    <div class="callout-icon">✓</div>
+    <div class="callout-body">
+      <div class="callout-title">Best Practice — Validated</div>
+      <p>APIM is provisioned as the AI API gateway in front of the AI Foundry Agent subnet. Rate limiting, authentication policy, and developer portal configuration are already in place at the infrastructure level. Advanced policies (semantic caching, cost attribution, per-team quotas) are Phase 2 configuration work on top of an already-running gateway — not a greenfield build.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ 04 ML WORKSPACE & MLOPS ═══ -->
+<div id="ch4" class="sec">
+  <div class="sec-rule"></div>
+  <p class="sec-kick">04 — ML Workspace & MLOps Pipeline</p>
+  <h2 class="sec-h">Intelligent Operations:<br><em>Event-Driven MLOps with Governed Promotion</em></h2>
+  <p class="sec-lead">The MLOps layer is where infrastructure meets intelligence. Built on a custom-provisioned Azure ML Workspace, it delivers a semi-automated pipeline that handles routine operational decisions autonomously while keeping human engineers in control of production promotion — a balance that reflects mature, production-grade ML thinking.</p>
+  <span class="ch-status built">Delivered — Custom Terraform · Azure ML Pipelines · Event Grid · Function App</span>
+
+  <div class="prose">
+    <h3>4.1 ML Workspace — Custom Terraform Provisioning</h3>
+    <p>The Azure ML Workspace is provisioned through a <strong>custom Terraform codebase</strong>, separate from the AVM ai-ml pattern module. This reflects a deliberate engineering choice: the ML Workspace has configuration requirements specific to ML workloads that warranted a purpose-built module rather than a generic platform pattern.</p>
+    <p>The workspace is configured in <strong>Allow Internet Outbound mode</strong> — a considered decision that balances two real constraints. ML compute needs outbound internet access to pull package dependencies, Docker base images, and pre-trained model weights from public registries during training jobs. Simultaneously, all data-plane resources (Storage, Key Vault, Container Registry, and the workspace itself) remain entirely private with dedicated Private Endpoints. This configuration gives ML engineers a practical developer experience without compromising data security.</p>
+  </div>
+
+  <div class="decision">
+    <div class="decision-label">Architectural Decision — Allow Internet Outbound Mode</div>
+    <h5>Why not fully private compute?</h5>
+    <p>A fully private ML workspace (no internet outbound) requires mirroring all package indices, Docker registries, and model hubs into private Azure resources — a significant operational overhead that adds friction to every new package or model version adoption. Allow Internet Outbound mode is <strong>Microsoft's recommended configuration</strong> for ML workloads that need package flexibility while keeping all data private. Data never leaves the private network; only compute dependency downloads use the outbound path. The platform is fully capable of enforcing a private-only configuration if compliance requirements demand it — the infrastructure exists to support both modes.</p>
+  </div>
+
+  <div class="prose">
+    <h3>4.2 One-Time Setup — Intentional Onboarding, Not a Gap</h3>
+    <p>Standing up a new ML environment involves a set of one-time setup steps performed by an ML engineer using the documented runbook: registering data assets in the workspace, creating and registering ML environments (Docker/Conda specifications), creating the training pipeline from the existing codebase, and wiring up the retraining loop components — the batch endpoint, Function App subscription, and Event Grid topic connection.</p>
+    <p>These steps are <strong>intentionally performed once per environment</strong> rather than fully automated. This design reflects a considered trade-off: ML environments carry context-specific configuration (dataset schemas, model architecture choices, evaluation thresholds) that benefits from engineer review at setup time. The runbook is fully documented and repeatable. The infrastructure to fully automate this onboarding exists and can be implemented as a Phase 2 enhancement when the pattern stabilises across teams.</p>
+
+    <h3>4.3 The Semi-Automated MLOps Lifecycle</h3>
+    <p>Once an environment is set up, the operational pipeline runs with minimal human involvement for routine retraining cycles. The architecture strikes a deliberate balance: <strong>automated where repetition adds no value</strong> (detecting drift, triggering retraining), and <strong>human-gated where judgement adds value</strong> (deciding whether a retrained model should go to production).</p>
+  </div>
+
+  <div class="arch-wrap">
+    <div class="arch-head">
+      <span class="arch-lbl">Diagram 04 — MLOps Pipeline: Event-Driven Retraining + Governed Promotion</span>
+      <span class="arch-tag">Azure ML · Event Grid · Function App · Batch Endpoint</span>
+    </div>
+    <div class="arch-body">
+      <svg viewBox="0 0 880 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:'JetBrains Mono',monospace">
+        <defs>
+          <marker id="marr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#1a56db" opacity=".6"/></marker>
+          <marker id="gauto" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#047857" opacity=".6"/></marker>
+          <marker id="ghuman" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#1a56db" opacity=".5"/></marker>
+        </defs>
+
+        <!-- Stage labels -->
+        <text x="60"  y="22" text-anchor="middle" fill="#1a56db" font-size="8" letter-spacing=".5" font-weight="500">EXPERIMENT</text>
+        <text x="200" y="22" text-anchor="middle" fill="#0e7490" font-size="8" letter-spacing=".5" font-weight="500">REGISTER</text>
+        <text x="370" y="22" text-anchor="middle" fill="#047857" font-size="8" letter-spacing=".5" font-weight="500">MONITOR</text>
+        <text x="570" y="22" text-anchor="middle" fill="#047857" font-size="8" letter-spacing=".5" font-weight="500">AUTO-RETRAIN</text>
+        <text x="760" y="22" text-anchor="middle" fill="#1a56db" font-size="8" letter-spacing=".5" font-weight="500">GOVERNED PROMOTE</text>
+
+        <line x1="20" y1="28" x2="108" y2="28" stroke="#1a56db" stroke-opacity=".3" stroke-width="1.5"/>
+        <line x1="145" y1="28" x2="266" y2="28" stroke="#0e7490" stroke-opacity=".3" stroke-width="1.5"/>
+        <line x1="296" y1="28" x2="454" y2="28" stroke="#047857" stroke-opacity=".3" stroke-width="1.5"/>
+        <line x1="468" y1="28" x2="672" y2="28" stroke="#047857" stroke-opacity=".3" stroke-width="1.5"/>
+        <line x1="690" y1="28" x2="858" y2="28" stroke="#1a56db" stroke-opacity=".3" stroke-width="1.5"/>
+
+        <!-- Stage 1: Experiment -->
+        <rect x="14" y="38" width="120" height="200" rx="4" fill="#1a56db" fill-opacity=".04" stroke="#1a56db" stroke-opacity=".2" stroke-width="1.5"/>
+        <rect x="24" y="52" width="100" height="28" rx="3" fill="#1a56db" fill-opacity=".06"/>
+        <text x="74" y="67" text-anchor="middle" fill="#1a56db" font-size="8">Training Pipeline</text>
+        <text x="74" y="78" text-anchor="middle" fill="#6b748a" font-size="7">Azure ML compute</text>
+        <rect x="24" y="86" width="100" height="28" rx="3" fill="#1a56db" fill-opacity=".06"/>
+        <text x="74" y="101" text-anchor="middle" fill="#1a56db" font-size="8">Run Tracking</text>
+        <text x="74" y="112" text-anchor="middle" fill="#6b748a" font-size="7">Metrics · Params · Lineage</text>
+        <rect x="24" y="120" width="100" height="28" rx="3" fill="#1a56db" fill-opacity=".06"/>
+        <text x="74" y="135" text-anchor="middle" fill="#1a56db" font-size="8">Evaluation Pipeline</text>
+        <text x="74" y="146" text-anchor="middle" fill="#6b748a" font-size="7">Challenger vs champion</text>
+        <rect x="24" y="154" width="100" height="28" rx="3" fill="#1a56db" fill-opacity=".06"/>
+        <text x="74" y="169" text-anchor="middle" fill="#1a56db" font-size="8">Quality Gate</text>
+        <text x="74" y="180" text-anchor="middle" fill="#6b748a" font-size="7">Threshold check auto</text>
+        <text x="74" y="226" text-anchor="middle" fill="#6b748a" font-size="7">Manual first run</text>
+        <text x="74" y="236" text-anchor="middle" fill="#6b748a" font-size="7">Auto on retrain trigger</text>
+
+        <!-- Arrow -->
+        <line x1="134" y1="138" x2="150" y2="138" stroke="#0e7490" stroke-width="1.5" stroke-opacity=".5" marker-end="url(#marr)"/>
+
+        <!-- Stage 2: Register -->
+        <rect x="150" y="38" width="110" height="200" rx="4" fill="#0e7490" fill-opacity=".04" stroke="#0e7490" stroke-opacity=".2" stroke-width="1.5"/>
+        <rect x="160" y="52" width="90" height="28" rx="3" fill="#0e7490" fill-opacity=".06"/>
+        <text x="205" y="67" text-anchor="middle" fill="#0e7490" font-size="8">Model Registry</text>
+        <text x="205" y="78" text-anchor="middle" fill="#6b748a" font-size="7">Azure ML Registry</text>
+        <rect x="160" y="86" width="90" height="28" rx="3" fill="#0e7490" fill-opacity=".06"/>
+        <text x="205" y="101" text-anchor="middle" fill="#0e7490" font-size="8">Staging Tag</text>
+        <text x="205" y="112" text-anchor="middle" fill="#6b748a" font-size="7">+ Full lineage</text>
+        <rect x="160" y="120" width="90" height="28" rx="3" fill="#0e7490" fill-opacity=".06"/>
+        <text x="205" y="135" text-anchor="middle" fill="#0e7490" font-size="8">Version + Metadata</text>
+        <text x="205" y="146" text-anchor="middle" fill="#6b748a" font-size="7">Data, code, env hash</text>
+        <text x="205" y="226" text-anchor="middle" fill="#047857" font-size="7">Auto on quality pass</text>
+
+        <!-- Arrow -->
+        <line x1="260" y1="138" x2="276" y2="138" stroke="#047857" stroke-width="1.5" stroke-opacity=".5" marker-end="url(#gauto)"/>
+
+        <!-- Stage 3: Monitor -->
+        <rect x="276" y="38" width="130" height="200" rx="4" fill="#047857" fill-opacity=".04" stroke="#047857" stroke-opacity=".2" stroke-width="1.5"/>
+        <rect x="286" y="52" width="110" height="28" rx="3" fill="#047857" fill-opacity=".06"/>
+        <text x="341" y="67" text-anchor="middle" fill="#047857" font-size="8">Azure ML Monitoring</text>
+        <text x="341" y="78" text-anchor="middle" fill="#6b748a" font-size="7">Continuous on prod endpoint</text>
+        <rect x="286" y="86" width="110" height="28" rx="3" fill="#047857" fill-opacity=".06"/>
+        <text x="341" y="101" text-anchor="middle" fill="#047857" font-size="8">Data Drift Detection</text>
+        <text x="341" y="112" text-anchor="middle" fill="#6b748a" font-size="7">Input distribution shift</text>
+        <rect x="286" y="120" width="110" height="28" rx="3" fill="#047857" fill-opacity=".06"/>
+        <text x="341" y="135" text-anchor="middle" fill="#047857" font-size="8">Model Drift Detection</text>
+        <text x="341" y="146" text-anchor="middle" fill="#6b748a" font-size="7">Prediction quality change</text>
+        <rect x="286" y="154" width="110" height="28" rx="3" fill="#047857" fill-opacity=".06"/>
+        <text x="341" y="169" text-anchor="middle" fill="#047857" font-size="8">Drift Signal → Event</text>
+        <text x="341" y="180" text-anchor="middle" fill="#6b748a" font-size="7">Azure Event Grid topic</text>
+        <text x="341" y="226" text-anchor="middle" fill="#047857" font-size="7">Always running</text>
+        <text x="341" y="236" text-anchor="middle" fill="#047857" font-size="7">fully automated</text>
+
+        <!-- Arrow: Event Grid -->
+        <line x1="406" y1="172" x2="428" y2="172" stroke="#047857" stroke-width="1.5" stroke-opacity=".5" marker-end="url(#gauto)"/>
+
+        <!-- Stage 4: Auto-retrain (Event Grid → Fn App → Batch EP) -->
+        <rect x="428" y="38" width="200" height="200" rx="4" fill="#047857" fill-opacity=".04" stroke="#047857" stroke-opacity=".25" stroke-width="1.5"/>
+        <text x="528" y="57" text-anchor="middle" fill="#047857" font-size="9" font-weight="500">Event-Driven Retraining</text>
+        <rect x="438" y="64" width="180" height="36" rx="3" fill="#047857" fill-opacity=".07"/>
+        <text x="528" y="80" text-anchor="middle" fill="#047857" font-size="8.5">Azure Event Grid</text>
+        <text x="528" y="93" text-anchor="middle" fill="#6b748a" font-size="7">Drift event subscriber · Topic routing</text>
+        <!-- Arrow down -->
+        <line x1="528" y1="100" x2="528" y2="114" stroke="#047857" stroke-width="1.5" stroke-opacity=".4" marker-end="url(#gauto)"/>
+        <rect x="438" y="114" width="180" height="36" rx="3" fill="#047857" fill-opacity=".07"/>
+        <text x="528" y="130" text-anchor="middle" fill="#047857" font-size="8.5">Custom Function App</text>
+        <text x="528" y="143" text-anchor="middle" fill="#6b748a" font-size="7">Evaluates signal · Decides trigger</text>
+        <!-- Arrow down -->
+        <line x1="528" y1="150" x2="528" y2="164" stroke="#047857" stroke-width="1.5" stroke-opacity=".4" marker-end="url(#gauto)"/>
+        <rect x="438" y="164" width="180" height="36" rx="3" fill="#047857" fill-opacity=".07"/>
+        <text x="528" y="180" text-anchor="middle" fill="#047857" font-size="8.5">Batch Endpoint Trigger</text>
+        <text x="528" y="193" text-anchor="middle" fill="#6b748a" font-size="7">Pipeline component · ML job submitted</text>
+        <text x="528" y="226" text-anchor="middle" fill="#047857" font-size="7">Fully automated</text>
+        <text x="528" y="236" text-anchor="middle" fill="#047857" font-size="7">zero human initiation</text>
+
+        <!-- Arrow to promote -->
+        <line x1="628" y1="155" x2="646" y2="155" stroke="#1a56db" stroke-width="1.5" stroke-opacity=".5" marker-end="url(#ghuman)"/>
+
+        <!-- Stage 5: Governed Promotion -->
+        <rect x="646" y="38" width="218" height="200" rx="4" fill="#1a56db" fill-opacity=".04" stroke="#1a56db" stroke-opacity=".25" stroke-width="1.5"/>
+        <text x="755" y="57" text-anchor="middle" fill="#1a56db" font-size="9" font-weight="500">Governed Promotion</text>
+        <rect x="656" y="64" width="198" height="36" rx="3" fill="#1a56db" fill-opacity=".06"/>
+        <text x="755" y="80" text-anchor="middle" fill="#1a56db" font-size="8.5">Custom Validation Step</text>
+        <text x="755" y="93" text-anchor="middle" fill="#6b748a" font-size="7">Model outputs · Business logic · Metrics review</text>
+        <line x1="755" y1="100" x2="755" y2="114" stroke="#1a56db" stroke-width="1.5" stroke-opacity=".4" marker-end="url(#ghuman)"/>
+        <rect x="656" y="114" width="198" height="36" rx="3" fill="#1a56db" fill-opacity=".06"/>
+        <text x="755" y="130" text-anchor="middle" fill="#1a56db" font-size="8.5">Human Reviewer</text>
+        <text x="755" y="143" text-anchor="middle" fill="#6b748a" font-size="7">Approves or rejects — with context</text>
+        <line x1="755" y1="150" x2="755" y2="164" stroke="#1a56db" stroke-width="1.5" stroke-opacity=".4" marker-end="url(#ghuman)"/>
+        <rect x="656" y="164" width="198" height="36" rx="3" fill="#047857" fill-opacity=".07"/>
+        <text x="755" y="180" text-anchor="middle" fill="#047857" font-size="8.5">Production Endpoint</text>
+        <text x="755" y="193" text-anchor="middle" fill="#6b748a" font-size="7">Blue-green · Traffic split · Live</text>
+        <text x="755" y="226" text-anchor="middle" fill="#1a56db" font-size="7">Deliberate human gate</text>
+        <text x="755" y="236" text-anchor="middle" fill="#1a56db" font-size="7">production governance</text>
+
+        <!-- Feedback loop -->
+        <path d="M755,310 Q440,355 74,310" fill="none" stroke="#047857" stroke-width="1.2" stroke-opacity=".25" stroke-dasharray="4,3" marker-end="url(#gauto)"/>
+        <text x="420" y="350" text-anchor="middle" fill="#047857" font-size="7.5" opacity=".6">Monitoring continues on production endpoint → drift detected → automated retrain loop restarts</text>
+
+        <!-- Legend -->
+        <rect x="290" y="258" width="300" height="52" rx="4" fill="none" stroke="#6b748a" stroke-opacity=".15" stroke-width="1"/>
+        <text x="440" y="274" text-anchor="middle" fill="#6b748a" font-size="8" opacity=".7">Legend</text>
+        <rect x="305" y="282" width="10" height="10" rx="2" fill="#047857" fill-opacity=".3"/>
+        <text x="322" y="291" fill="#6b748a" font-size="7.5">Fully automated</text>
+        <rect x="405" y="282" width="10" height="10" rx="2" fill="#1a56db" fill-opacity=".3"/>
+        <text x="422" y="291" fill="#6b748a" font-size="7.5">Human-gated (by design)</text>
+        <rect x="305" y="300" width="10" height="10" rx="2" fill="#b45309" fill-opacity=".3"/>
+        <text x="322" y="309" fill="#6b748a" font-size="7.5">One-time setup</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="flow-steps">
+    <div class="flow-step">
+      <div class="flow-num">01</div>
+      <div class="flow-content">
+        <div class="flow-tag setup">One-time per environment</div>
+        <h5>Environment Setup — Documented Onboarding</h5>
+        <p>An ML engineer registers data assets, creates ML environments (Docker/Conda), authors the training pipeline from the existing codebase, and wires the retraining loop: creates the batch endpoint, deploys the pipeline component, configures the Event Grid topic, and registers the Function App subscription. This is a deliberate, reviewed setup step — not a candidate for full automation until the pattern stabilises across teams. The runbook is fully documented and repeatable in under a day.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">02</div>
+      <div class="flow-content">
+        <div class="flow-tag auto">automated</div>
+        <h5>Experiment & Training Pipeline</h5>
+        <p>Training pipeline jobs run on Azure ML compute clusters. All runs are tracked with full lineage — input dataset version, hyperparameters, environment hash, and output artefacts. An evaluation pipeline automatically compares the challenger model against the current champion on a version-locked held-out dataset. Models that pass the quality threshold are automatically registered in the Azure ML Model Registry with a <code>Staging</code> tag and complete metadata.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">03</div>
+      <div class="flow-content">
+        <div class="flow-tag auto">automated</div>
+        <h5>Continuous Monitoring — Data Drift & Model Drift</h5>
+        <p>Azure ML's built-in monitoring runs continuously against the production endpoint, tracking input feature distribution (data drift) and prediction quality (model drift) against the training baseline. This is fully automated — no engineer needs to check dashboards to detect that retraining is needed. When drift exceeds the configured threshold, a signal is published to an <strong>Azure Event Grid topic</strong>.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">04</div>
+      <div class="flow-content">
+        <div class="flow-tag auto">automated</div>
+        <h5>Event-Driven Retraining — Function App + Batch Endpoint</h5>
+        <p>A <strong>custom Azure Function App</strong> subscribes to the Event Grid topic and acts as the intelligent trigger layer. It evaluates the drift signal's severity, applies any business rules (e.g. minimum data volume for retraining to make sense), and if conditions are met, triggers the retraining pipeline via its <strong>Batch Endpoint</strong>. The entire cycle — from drift detection to a new training job being submitted — requires zero human involvement. This is a genuinely event-driven retraining loop, not a scheduled job.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">05</div>
+      <div class="flow-content">
+        <div class="flow-tag human">deliberate human gate</div>
+        <h5>Human-Validated Promotion — Governance by Design</h5>
+        <p>After retraining completes, a <strong>custom validation step</strong> gates promotion to production. A human reviewer evaluates model outputs, validation metrics, and business-logic correctness before the new model version is promoted to the production endpoint. This gate is a <strong>deliberate architectural decision</strong>, not a shortcoming. Automated metrics can confirm a model retrained successfully, but they cannot confirm it is appropriate for production in the context of recent business, data, or regulatory changes. The platform is fully capable of automating this gate — the infrastructure exists — and that is the planned Phase 2 enhancement once acceptance criteria are formally encoded.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="decision">
+    <div class="decision-label">Architectural Decision — Human Promotion Gate</div>
+    <h5>Why human validation is the right choice at this stage</h5>
+    <p>Fully automated model promotion is achievable on this platform — the ML Registry, endpoint deployment pipeline, and approval infrastructure are all in place to support it. The decision to require human review at promotion reflects engineering maturity: automated metrics confirm that a model trained correctly, but a human reviewer can assess whether the model should go live in the context of current business conditions, recent data changes, and regulatory posture. When formal acceptance criteria are encoded and validated over multiple retraining cycles, full automation of the promotion gate is a straightforward Phase 2 implementation on existing infrastructure.</p>
+  </div>
+
+  <div class="callout success">
+    <div class="callout-icon">✓</div>
+    <div class="callout-body">
+      <div class="callout-title">Best Practice — Confirmed</div>
+      <p>The Event Grid + Function App trigger pattern decouples drift detection from retraining execution. This is architecturally cleaner than a scheduled polling approach — retraining runs exactly when needed, not on a fixed schedule regardless of drift state. It also means the trigger logic can evolve independently of the ML pipeline code.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ 05 CHALLENGES & ROADMAP ═══ -->
+<div id="challenges" class="sec">
+  <div class="sec-rule"></div>
+  <p class="sec-kick">05 — Challenges & Roadmap</p>
+  <h2 class="sec-h">Known Challenges<br><em>& What Comes Next</em></h2>
+  <p class="sec-lead">A production platform surfaces real engineering challenges. We document them transparently here — with clear mitigations and a Phase 2 roadmap that builds directly on the infrastructure already in place.</p>
+
+  <table class="ch-table">
+    <thead><tr><th>Challenge</th><th>Impact</th><th>Mitigation</th><th>Severity</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Private DNS Split-Brain</strong><br><small>Multi-region Private Endpoint DNS can conflict if spokes register records independently.</small></td>
+        <td>New Private Endpoints fail to resolve unless hub DNS Zone links are configured correctly.</td>
+        <td>Terraform outputs from the bootstrap layer pipe hub DNS Zone IDs directly into the AI platform module. All Private Endpoint DNS registration targets hub zones only — enforced by Checkov policy gate in CI.</td>
+        <td><span class="sev sev-h">● High</span></td>
+      </tr>
+      <tr>
+        <td><strong>Azure OpenAI TPM Limits</strong><br><small>Tokens-per-minute and requests-per-minute are set at the deployment level and do not auto-scale.</small></td>
+        <td>Request failures under load spikes if quota is not correctly pre-provisioned per deployment.</td>
+        <td>AOAI quotas are managed via Terraform — changes require a reviewed PR. PTU (Provisioned Throughput Units) are planned for high-volume workloads. APIM rate limiting policies are Phase 2 configuration on the already-provisioned gateway.</td>
+        <td><span class="sev sev-h">● High</span></td>
+      </tr>
+      <tr>
+        <td><strong>ML Compute Cold Start</strong><br><small>Scale-to-zero compute clusters take 3–8 minutes to provision for the first job.</small></td>
+        <td>Poor developer experience for interactive or frequent training jobs.</td>
+        <td>Dev clusters maintain a minimum of 1 warm node during business hours. Production inference uses Managed Online Endpoints (always-on) — not cluster compute. This separation is a deliberate design choice in the custom Terraform configuration.</td>
+        <td><span class="sev sev-m">● Medium</span></td>
+      </tr>
+      <tr>
+        <td><strong>AVM Module Upgrade Lag</strong><br><small>AVM major version updates may include breaking changes requiring Terraform refactoring.</small></td>
+        <td>Security-critical AVM updates may be delayed if breaking changes require significant effort.</td>
+        <td>Dependabot monitors AVM module versions weekly. Patch and minor upgrades are applied automatically via PR. Major version upgrades are planned as sprint items with a dedicated testing window in non-prod before production promotion.</td>
+        <td><span class="sev sev-m">● Medium</span></td>
+      </tr>
+      <tr>
+        <td><strong>Model Promotion Acceptance Criteria</strong><br><small>Human validation gate requires reviewers to make judgement calls without formally encoded criteria.</small></td>
+        <td>Inconsistent promotion decisions across reviewers; gate may slow down routine retraining cycles.</td>
+        <td>The current gate correctly prioritises safety over speed. Phase 2 work is to formalise acceptance criteria as measurable thresholds — enabling automation of the gate for routine retraining while preserving human review for out-of-distribution model behaviour.</td>
+        <td><span class="sev sev-m">● Medium</span></td>
+      </tr>
+      <tr>
+        <td><strong>Terraform State Drift</strong><br><small>Azure auto-healing or manual portal changes can cause IaC state drift without triggering a pipeline.</small></td>
+        <td>Undetected drift causes apply failures or silent configuration inconsistencies on next run.</td>
+        <td>Azure Policy <code>deny</code> blocks manual resource creation in production. Azure Locks protect state storage and Key Vault. Scheduled drift detection (GitHub Actions cron running <code>terraform plan</code> every 6 hours) is a Phase 2 operational enhancement.</td>
+        <td><span class="sev sev-l">● Low</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="divider"></div>
+
+  <p class="sec-kick">Phase 2 — Platform Roadmap</p>
+  <h3 style="font-family:'Fraunces',serif;font-size:28px;font-weight:600;color:var(--ink);margin-bottom:10px;letter-spacing:-.01em;">Building on Existing Infrastructure</h3>
+  <p style="color:var(--ink3);margin-bottom:32px;max-width:660px;">Every Phase 2 item builds directly on infrastructure already provisioned. The platform team is not starting from scratch — they are unlocking capabilities that the current deployment already supports.</p>
+
+  <div class="roadmap-grid">
+    <div class="roadmap-item">
+      <div class="roadmap-phase">Phase 2 · AI Apps</div>
+      <div class="roadmap-title">GenAI Microservices Deployment</div>
+      <div class="roadmap-body">Container App Environment is provisioned and network-ready. Application teams deploy Frontend, Orchestrator, MCP, Ingestion, and Dapr components into the existing environment using the same GitHub Actions pipeline. No new infrastructure required.</div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-phase">Phase 2 · AI Gateway</div>
+      <div class="roadmap-title">APIM Policy Configuration</div>
+      <div class="roadmap-body">APIM is running. Phase 2 adds rate limiting policies per team, semantic caching via Redis, cost attribution tags on every AI request, and a developer portal for AI API discovery. Infrastructure exists — this is configuration work.</div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-phase">Phase 2 · RAG</div>
+      <div class="roadmap-title">Knowledge Grounding & RAG</div>
+      <div class="roadmap-body">Azure AI Search and Cosmos DB are provisioned. Phase 2 wires these to AI Foundry Project connections and builds the hybrid search RAG pipeline (dense + sparse retrieval via RRF). Bing grounding is available for public knowledge augmentation.</div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-phase">Phase 2 · MLOps</div>
+      <div class="roadmap-title">Automated Promotion Gate</div>
+      <div class="roadmap-body">The current human validation gate is replaced with an encoded acceptance criteria check once thresholds are formally defined and validated across multiple retraining cycles. The deployment pipeline already supports automated promotion — this is a policy change, not an engineering build.</div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-phase">Phase 2 · Operations</div>
+      <div class="roadmap-title">Scheduled Drift Detection</div>
+      <div class="roadmap-body">GitHub Actions cron running <code>terraform plan</code> every 6 hours across all environments. Non-empty plans alert to Teams with a diff summary. Enables proactive detection of configuration drift before it causes pipeline failures.</div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-phase">Phase 3 · Strategy</div>
+      <div class="roadmap-title">AWS & GCP Tracks</div>
+      <div class="roadmap-body">The Azure track establishes the cloud-agnostic module interface, CI/CD patterns, and MLOps lifecycle design. AWS (Control Tower + SageMaker) and GCP (Landing Zone + Vertex AI) tracks follow the same architecture blueprint, completing the multi-cloud vision.</div>
+    </div>
+  </div>
+</div>
+
+<!-- CONCLUSION -->
+<div class="conclusion">
+  <h2>A Deliberate Platform — Built to the Right Standard</h2>
+  <p>Four layers delivered. Every non-standard choice made for a documented reason. Every Phase 2 capability enabled by infrastructure already running. This is what mature platform engineering looks like.</p>
+  <div class="tag-row">
+    <span class="tag">Azure ALZ Accelerator</span>
+    <span class="tag">AVM Pattern Modules</span>
+    <span class="tag">GitHub Actions</span>
+    <span class="tag">OIDC Workload Identity</span>
+    <span class="tag">Azure AI Foundry</span>
+    <span class="tag">AI Foundry Agent Service</span>
+    <span class="tag">Container App Environment</span>
+    <span class="tag">Azure APIM</span>
+    <span class="tag">Application Gateway + WAF</span>
+    <span class="tag">Custom Terraform</span>
+    <span class="tag">Azure ML Pipelines</span>
+    <span class="tag">Event Grid + Function App</span>
+    <span class="tag">Batch Endpoint</span>
+    <span class="tag">Data Drift + Model Drift</span>
+    <span class="tag">Multi-Region Hub-Spoke</span>
+    <span class="tag">Cloud-Agnostic</span>
+  </div>
+</div>
+
+<div class="footer">
+  <div>
+    <div class="footer-brand">DataGrokr Analytics Private Limited</div>
+    <div style="margin-top:4px">Cloud-Agnostic AI Platform · Azure Track · 2026</div>
+  </div>
+  <div style="text-align:right">
+    <div>White Paper v1.0 — Final</div>
+    <div style="margin-top:4px">Classification: DataGrokr Confidential</div>
+  </div>
+</div>
+
+</div><!-- /page -->
+
+<script>
+function toggleDrawer(){document.getElementById('td').classList.toggle('open');}
+function setTheme(t,el){document.documentElement.setAttribute('data-theme',t);document.querySelectorAll('.t-btn[onclick^="setTheme"]').forEach(b=>b.classList.remove('active'));el.classList.add('active');}
+function setAccent(a,el){document.documentElement.setAttribute('data-accent',a);document.querySelectorAll('.acc-dot').forEach(d=>d.classList.remove('active'));el.classList.add('active');}
+function setSize(s,el){document.body.style.fontSize=s;document.querySelectorAll('.t-btn[onclick^="setSize"]').forEach(b=>b.classList.remove('active'));el.classList.add('active');}
+document.addEventListener('click',function(e){const p=document.getElementById('tp');if(!p.contains(e.target))document.getElementById('td').classList.remove('open');});
+</script>
+</body>
+</html>
