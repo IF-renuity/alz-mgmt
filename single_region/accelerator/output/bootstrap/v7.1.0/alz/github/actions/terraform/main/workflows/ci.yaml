@@ -1,0 +1,35 @@
+---
+name: 01 Azure Landing Zones Continuous Integration
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      terraform_cli_version:
+        description: 'Terraform CLI Version'
+        required: true
+        default: 'latest'
+        type: string
+      root_module_folder_relative_path:
+        description: 'relative path of terrform scripts to be executed'
+        required: true
+        default: './platform/only_connectivity'
+        type: string
+
+jobs:
+  validate_and_plan:
+    uses: ${project_or_organization_name}/${repository_name_templates}/${ci_template_path}@main
+    name: 'CI'
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+    with:
+<<<<<<< HEAD:.github/workflows/ci.yaml
+      root_module_folder_relative_path: ${{ inputs.root_module_folder_relative_path }}
+      terraform_cli_version: ${{ inputs.terraform_cli_version }}
+=======
+      root_module_folder_relative_path: '${root_module_folder_relative_path}'
+      terraform_cli_version: $${{ inputs.terraform_cli_version }}
+>>>>>>> dev:single_region/accelerator/output/bootstrap/v7.1.0/alz/github/actions/terraform/main/workflows/ci.yaml
