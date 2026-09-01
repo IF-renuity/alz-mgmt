@@ -100,38 +100,38 @@ Before starting, collect:
 azure_ai_platform/
 ├── azure-ai-platform-whitepaper-v3.html
 ├── README.md
-└── single_region/
-    ├── accelerator/                          # ALZ Accelerator output, part of the github as an example
-    │   ├── deploy.ps1                      # Bootstrap deployment script
-    │   ├── config/
-    │   │   ├── inputs.yaml                  # ALZ Accelerator inputs
-    │   │   └── platform-landing-zone.tfvars # input config for the scenario
-    │   └── output/
-    │       ├── bootstrap/
-    │       └── starter/v15.2.0
-    │           ├── platform_landing_zone    # Generated Terraform code
-    │           ├── empty                    # Terraform code to created empty platform
-    │           └── test                     
-    │
-    ├── platform/
-    │   ├── default/                        # Full platform (copied from bootstrap)
-    │   │   ├── main.tf
-    │   │   ├── variables.tf
-    │   │   ├── outputs.tf
-    │   │   └── terraform.tfvars
-    │   │
-    │   └── only_connectivity/              # Connectivity-only variant
-    │       ├── main.tf                     # Customized (mgmt groups removed)
-    │       ├── variables.tf
-    │       ├── outputs.tf
-    │       └── terraform.tfvars
-    │
-    └── applications/
-        └── ai-ml/                          # AI/ML landing zone
-            ├── main.tf
-            ├── variables.tf
-            ├── outputs.tf
-            └── terraform.tfvars
+│
+├── accelerator/                          # ALZ Accelerator output, part of the github as an example
+│   ├── deploy.ps1                      # Bootstrap deployment script
+│   ├── config/
+│   │   ├── inputs.yaml                  # ALZ Accelerator inputs
+│   │   └── platform-landing-zone.tfvars # input config for the scenario
+│   └── output/
+│       ├── bootstrap/
+│       └── starter/v15.2.0
+│           ├── platform_landing_zone    # Generated Terraform code
+│           ├── empty                    # Terraform code to created empty platform
+│           └── test                     
+│
+├── platform/
+│   ├── single_region_default/                        # Full platform (copied from bootstrap)
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   ├── outputs.tf
+│   │   └── terraform.tfvars
+│   │
+│   └── single_region_only_connectivity/              # Connectivity-only without firwall variant
+│       ├── main.tf                     # Customized (mgmt groups removed)
+│       ├── variables.tf
+│       ├── outputs.tf
+│       └── terraform.tfvars
+│
+└── applications/
+    └── ai-ml/                          # AI/ML landing zone
+        ├── main.tf
+        ├── variables.tf
+        ├── outputs.tf
+        └── terraform.tfvars
 ```
 
 ### Logical Architecture
@@ -334,6 +334,7 @@ $targetFolderPath = "./accelerator/single_region_github"
     ```
 
 **File:** `accelerator/single_region_github/platform-landing-zone.tfvars`
+
 3. edit platform-landing-zone which controls the resource deployments of platform
 ```hcl
 # Core Settings
@@ -538,12 +539,12 @@ git branch
 
 ```bash
 # Create platform folder
-mkdir -p platform/default
+mkdir -p platform/single_region_default
 
-# Move Terraform files to platform/default/
-mv *.tf platform/default/
-mv *.tfvars platform/default/
-mv modules platform/default/
+# Move Terraform files to platform/single_region_default/
+mv *.tf platform/single_region_default/
+mv *.tfvars platform/single_region_default/
+mv modules platform/single_region_default/
 
 # Keep .github folder at root
 # Keep README.md, .gitignore at root if they exist
@@ -553,7 +554,7 @@ mv modules platform/default/
 ```
 alz-mgmt/
 ├── platform/
-│   └── default/
+│   └── single_region_default/
 │       ├── main.tf
 │       ├── variables.tf
 │       ├── outputs.tf
@@ -573,16 +574,16 @@ alz-mgmt/
 mkdir -p platform/only_connectivity
 
 # Move Terraform files
-mv *.tf platform/only_connectivity/
-mv *.tfvars platform/only_connectivity/
-mv modules platform/only_connectivity/
+mv *.tf platform/single_region_only_connectivity/
+mv *.tfvars platform/single_region_only_connectivity/
+mv modules platform/single_region_only_connectivity/
 
 # Customize main.tf to remove management groups (optional)
-# See example in azure_ai_platform/single_region/platform/only_connectivity/
+# See example in azure_ai_platform/single_region/platform/single_region_only_connectivity/
 ```
 ---
 
-### Step 2.4: Update GitHub Workflow
+### Step 2.4: Update GitHub Workflow (alz-mgmt repo)
 
 **File:** `.github/workflows/cd.yml`
 
@@ -676,11 +677,171 @@ jobs:
 2. Default value: `'./platform/only_connectivity'` (adjust if using `default` instead)
 3. Passed parameter to workflow template
 
+**Do the same for CI workflow too**
+
 ---
+### Step 2.5: Update GitHub Workflow (alz-mgmt-templates repo)
+```
+file path
+alz-mgmt-templates/
+└── .github/
+    └── workflows/
+        └── cd-template.yaml
+```
+Add same input variables to CI and CD workflow in this repo
 
-### Step 2.5: Customize Platform Configuration (Optional)
+example:
+```ymal
+---
+name: Continuous Delivery
+on:
+  workflow_call:
+    inputs:
+      terraform_action:
+        description: 'Terraform Action to perform'
+        default: 'apply'
+        type: string
+      root_module_folder_relative_path:
+        description: 'Root Module Folder Relative Path'
+        default: '.'
+        type: string
+      state_file_path:
+        description: 'Full path of terraform state file'
+        default: 'terraform.tfstate'
+        type: string
+      terraform_cli_version:
+        description: 'Terraform CLI Version'
+        default: 'latest'
+        type: string
 
-**File:** `platform/only_connectivity/terraform.tfvars`
+jobs:
+  plan:
+    name: Plan with Terraform
+    runs-on:
+      self-hosted
+    concurrency: mgmt-tfstate
+    environment: alz-mgmt-plan
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      ARM_CLIENT_ID: "${{ vars.AZURE_CLIENT_ID }}"
+      ARM_SUBSCRIPTION_ID: "${{ vars.AZURE_SUBSCRIPTION_ID }}"
+      ARM_TENANT_ID: "${{ vars.AZURE_TENANT_ID }}"
+      ARM_USE_AZUREAD: true
+      ARM_USE_OIDC: true
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+          terraform_version: ${{ inputs.terraform_cli_version }}
+
+      - name: Terraform Init
+        run: |
+          terraform \
+          -chdir="${{inputs.root_module_folder_relative_path}}" \
+          init \
+          -backend-config="resource_group_name=${{vars.BACKEND_AZURE_RESOURCE_GROUP_NAME}}" \
+          -backend-config="storage_account_name=${{vars.BACKEND_AZURE_STORAGE_ACCOUNT_NAME}}" \
+          -backend-config="container_name=${{vars.BACKEND_AZURE_STORAGE_ACCOUNT_CONTAINER_NAME}}" \
+          -backend-config="key=${{inputs.state_file_path}}"
+
+      - name: Terraform Plan for ${{ inputs.terraform_action == 'destroy' && 'Destroy' || 'Apply' }}
+        run: |
+          # shellcheck disable=SC2086
+          terraform \
+          -chdir="${{inputs.root_module_folder_relative_path}}" \
+          plan \
+          -out=tfplan \
+          -input=false \
+          ${{ inputs.terraform_action == 'destroy' && '-destroy' || '' }}
+
+      - name: Create Module Artifact
+        run: |
+          $stagingDirectory = "staging"
+          $rootModuleFolder = "${{inputs.root_module_folder_relative_path}}"
+          New-Item -Path . -Name $stagingDirectory -ItemType "directory"
+          Copy-Item -Path "./*" -Exclude @(".git", ".terraform", ".github",  $stagingDirectory) -Recurse -Destination "./$stagingDirectory"
+
+          $rootModuleFolderTerraformFolder = Join-Path -Path "./$stagingDirectory" -ChildPath $rootModuleFolder -AdditionalChildPath ".terraform"
+          if(Test-Path -Path $rootModuleFolderTerraformFolder) {
+            Remove-Item -Path $rootModuleFolderTerraformFolder -Recurse -Force
+          }
+
+        shell: pwsh
+
+      - name: Publish Module Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: module
+          path: ./staging/
+
+      - name: Show the Plan for Review
+        run: |
+          terraform \
+          -chdir="${{inputs.root_module_folder_relative_path}}" \
+          show \
+          tfplan
+
+  apply:
+    needs: plan
+    name: Apply with Terraform
+    runs-on:
+      self-hosted
+    concurrency: mgmt-tfstate
+    environment: alz-mgmt-apply
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      ARM_CLIENT_ID: "${{ vars.AZURE_CLIENT_ID }}"
+      ARM_SUBSCRIPTION_ID: "${{ vars.AZURE_SUBSCRIPTION_ID }}"
+      ARM_TENANT_ID: "${{ vars.AZURE_TENANT_ID }}"
+      ARM_USE_AZUREAD: true
+      ARM_USE_OIDC: true
+      AZAPI_RETRY_GET_AFTER_PUT_MAX_TIME: "60m" # Accounts for eventually consistent management group permissions propagation
+
+    steps:
+      - name: Download a Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: module
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+          terraform_version: ${{ inputs.terraform_cli_version }}
+
+      - name: Terraform Init
+        run: |
+          terraform \
+          -chdir="${{inputs.root_module_folder_relative_path}}" \
+          init \
+          -backend-config="resource_group_name=${{vars.BACKEND_AZURE_RESOURCE_GROUP_NAME}}" \
+          -backend-config="storage_account_name=${{vars.BACKEND_AZURE_STORAGE_ACCOUNT_NAME}}" \
+          -backend-config="container_name=${{vars.BACKEND_AZURE_STORAGE_ACCOUNT_CONTAINER_NAME}}" \
+          -backend-config="key=${{inputs.state_file_path}}"
+
+      - name: Terraform ${{ inputs.terraform_action == 'destroy' && 'Destroy' || 'Apply' }}
+        run: |
+          terraform \
+          -chdir="${{inputs.root_module_folder_relative_path}}" \
+          apply \
+          -input=false \
+          -auto-approve \
+          tfplan
+```
+Refactored chdir and backend-config arguments to use input variables instead of hardcoded default values.
+
+### Step 2.6: Customize Platform Configuration (Optional)
+
+**File:** `platform/single_region_only_connectivity/terraform.tfvars`
 
 Update values as needed:
 
@@ -708,14 +869,16 @@ primary_bastion_enabled                                              = true
 
 
 # DNS Zones - Cost Optimization
-private_link_excluded_zones = [
-  "azure_maria_db_server",
-  "azure_mysql_db_server",
-  # Add more zones you don't need
-]
-hub_virtual_networks.primary.private_dns_zones.private_link_private_dns_zones = {
-  azure_ml = { 
-    zone_name = "privatelink.api.azureml.ms" 
+hub_virtual_networks = {
+  primary = {
+    private_dns_zones = {
+      private_link_private_dns_zones = {
+        # ── AI Foundry ──────────────────────────────────────
+        azure_ml                    = { zone_name = "privatelink.api.azureml.ms" }
+        azure_ml_notebooks          = { zone_name = "privatelink.notebooks.azure.net" }
+          # Add zones you need 
+      }
+    }
   }
 }
 
@@ -727,7 +890,7 @@ enable_private_dns_resolver = false
 
 ---
 
-### Step 2.6: Commit and Push to Dev Branch
+### Step 2.7: Commit and Push to Dev Branch
 
 ```bash
 # Stage all changes
@@ -736,7 +899,7 @@ git add -A
 # Commit with descriptive message
 git commit -m "feat: reorganize platform code into folder structure
 
-- Moved Terraform files to platform/only_connectivity/
+- Moved Terraform files to platform/single_region_only_connectivity/
 - Updated workflow to support root_module_folder_relative_path
 - Customized terraform.tfvars for environment"
 
@@ -746,7 +909,7 @@ git push origin dev
 
 ---
 
-### Step 2.7: Create Pull Request
+### Step 2.8: Create Pull Request
 
 **In GitHub UI:**
 
@@ -756,7 +919,7 @@ git push origin dev
 4. **Description:**
    ```
    ## Changes
-   - Reorganized Terraform code into platform/only_connectivity/ folder
+   - Reorganized Terraform code into platform/single_region_only_connectivity/ folder
    - Updated workflow to support custom folder paths
    - Configured platform variables for swedencentral region
    
@@ -775,7 +938,7 @@ git push origin dev
 
 ---
 
-### Step 2.8: Review and Merge PR
+### Step 2.9: Review and Merge PR
 
 **Review Checklist:**
 - [ ] Terraform files moved to correct folder
@@ -792,7 +955,7 @@ git push origin dev
 
 ---
 
-### Step 2.9: Deploy Platform via GitHub Actions
+### Step 2.10: Deploy Platform via GitHub Actions
 
 **Option A: Automatic Deployment (on push to main)**
 
@@ -821,7 +984,7 @@ Monitor at: `https://github.com/<your-org>/alz-mgmt/actions`
 
 ---
 
-### Step 2.10: Verify Platform Deployment
+### Step 2.11: Verify Platform Deployment
 
 **Check 1: Workflow Completed Successfully**
 
@@ -892,7 +1055,7 @@ Platform outputs are stored in Terraform state and must be accessible to applica
 - `private_dns_zone_resource_ids` (map)
 - `hub_resource_group_resource_id`
 
-**If outputs are missing:** Update `platform/only_connectivity/outputs.tf` and re-run workflow.
+**If outputs are missing:** Update `platform/single_region_only_connectivity/outputs.tf` and re-run workflow.
 
 ---
 
@@ -968,7 +1131,7 @@ cp -r /path/to/azure_ai_platform/single_region/applications/ai-ml/* \
 ```
 alz-mgmt/
 ├── platform/
-│   └── only_connectivity/
+│   └── single_region_only_connectivity/
 │       └── (platform code)
 ├── applications/
 │   └── ai-ml/
@@ -1013,7 +1176,7 @@ hub_dns_server_ips = []
 platform_state_resource_group_name  = "rg-terraform-state-<name>"  # From bootstrap
 platform_state_storage_account_name = "sttfstate<name>"            # From bootstrap
 platform_state_container_name       = "tfstate"
-platform_state_key                  = "platform/only_connectivity/terraform.tfstate"
+platform_state_key                  = "platform/single_region_only_connectivity/terraform.tfstate"
 
 # ── AI Model Deployments ──────────────────────────────────────────────────
 ai_model_deployments = {
@@ -1042,7 +1205,7 @@ tags = {
 **Important Updates:**
 1. **Platform state location:** Use actual values from bootstrap outputs
 2. **VNet address space:** Must be `192.168.0.0/16` range (AI Foundry requirement)
-3. **Platform state key:** Must match the path used in Phase 2 (`platform/only_connectivity/terraform.tfstate`)
+3. **Platform state key:** Must match the path used in Phase 2 (`platform/single_region_only_connectivity/terraform.tfstate`)
 
 ---
 
@@ -1165,7 +1328,7 @@ git push origin dev
    ## Configuration
    - VNet: 192.168.0.0/23 (AI Foundry requirement)
    - Models: GPT-4o, Text Embeddings
-   - Platform state: platform/only_connectivity/terraform.tfstate
+   - Platform state: platform/single_region_only_connectivity/terraform.tfstate
    
    ## Testing
    - [ ] Terraform validate passed
@@ -1387,8 +1550,8 @@ Refer to `TFVARS-CUSTOMIZATION.md` for detailed examples of:
 
 | Scenario | File to Edit | Example |
 |---|---|---|
-| Change hub VNet CIDR | `platform/only_connectivity/terraform.tfvars` | `vnet_address_space = "172.16.0.0/16"` |
-| Reduce DNS zones | `platform/only_connectivity/terraform.tfvars` | Add to `private_link_excluded_zones` |
+| Change hub VNet CIDR | `platform/single_region_only_connectivity/terraform.tfvars` | `vnet_address_space = "172.16.0.0/16"` |
+| Reduce DNS zones | `platform/single_region_only_connectivity/terraform.tfvars` | Add to `private_link_excluded_zones` |
 | Add AI model | `applications/ai-ml/terraform.tfvars` | Add to `ai_model_deployments` map |
 | Change environment | `applications/ai-ml/terraform.tfvars` | `environment = "prd"` |
 | Enable Bastion | `applications/ai-ml/terraform.tfvars` | `enable_bastion = true` |

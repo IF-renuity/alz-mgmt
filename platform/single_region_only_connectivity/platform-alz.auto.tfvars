@@ -183,8 +183,134 @@ management_group_settings = {
         }
       }
     }
+    # corp = {
+    #   policy_assignments = {
+    #     "Deploy-Private-DNS-Zones" = {
+    #       enforcement_mode = "DoNotEnforce"
+    #     }
+    #   }
+    # }
+    # corp = {
+    #   policy_assignments = {
+    #     "Deploy-Private-DNS-Zones" = {
+    #       parameters = {
+
+    #         # ── Azure IoT Hub ──────────────────────────────────────────────
+    #         # privatelink.azure-devices.net (IoT Hub connections)
+    #         "azureIotHubsPrivateDnsZoneId" = "{\"value\":\"\"}"
+
+    #         # ── Azure IoT Device Update ────────────────────────────────────
+    #         # privatelink.azure-devices.net (Device Update / second reference)
+    #         "azureIotDeviceupdatePrivateDnsZoneId" = "{\"value\":\"\"}"
+
+    #         # ── Azure HDInsight ────────────────────────────────────────────
+    #         # privatelink.azurehdinsight.net
+    #         "azureHDInsightPrivateDnsZoneId" = "{\"value\":\"\"}"
+
+    #         # ── Azure Media Services ───────────────────────────────────────
+    #         # privatelink.media.azure.net
+    #         # The initiative has three Media Services parameters (key, live, stream)
+    #         # all resolving to the same zone — zero all three to be safe.
+    #         "azureMediaServicesKeyPrivateDnsZoneId"    = "{\"value\":\"\"}"
+    #         "azureMediaServicesLivePrivateDnsZoneId"   = "{\"value\":\"\"}"
+    #         "azureMediaServicesStreamPrivateDnsZoneId" = "{\"value\":\"\"}"
+
+    #         # ── Azure Databricks ──────────────────────────────────────────
+    #         # privatelink.azuredatabricks.net
+    #         "azureDatabricksPrivateDnsZoneId" = "{\"value\":\"\"}"
+
+    #         # ── Azure Backup ───────────────────────────────────────────────
+    #         # privatelink.{geo}.backup.windowsazure.com  (e.g. eus, wus2)
+    #         # The ALZ initiative parameter name is region-agnostic.
+    #         "azureSiteRecoveryBackupPrivateDnsZoneId" = "{\"value\":\"\"}"
+
+    #         # ── Azure File Sync (AFS) ──────────────────────────────────────
+    #         # privatelink.afs.azure.net
+    #         "azureFilePrivateDnsZoneId" = "{\"value\":\"\"}"
+
+    #         # ── Azure Managed Grafana ──────────────────────────────────────
+    #         # privatelink.grafana.azure.com
+    #         "azureManagedGrafanaWorkspacePrivateDnsZoneId" = "{\"value\":\"\"}"
+
+    #         # ── Azure Arc — Guest Configuration ───────────────────────────
+    #         # privatelink.guestconfiguration.azure.com
+    #         "azureArcGuestconfigurationPrivateDnsZoneId" = "{\"value\":\"\"}"
+
+    #         # ── Azure Arc — Hybrid Resource Provider (HIS) ────────────────
+    #         # privatelink.his.arc.azure.com
+    #         "azureArcHybridResourceProviderPrivateDnsZoneId" = "{\"value\":\"\"}"
+
+    #         # ── Azure Arc — Kubernetes Configuration ──────────────────────
+    #         # privatelink.dp.kubernetesconfiguration.azure.com
+    #         "azureArcKubernetesConfigurationPrivateDnsZoneId" = "{\"value\":\"\"}"
+
+    #         # ── Azure Static Web Apps / App Service (Web) ──────────────────
+    #         # privatelink.web.core.windows.net
+    #         "azureWebPrivateDnsZoneId" = "{\"value\":\"\"}"
+    #       }
+    #     }
+    #   }
+    # }
   }
-}
+  # override_policy_definition_parameter_assign_permissions_unset = [
+  #   {
+  #     definition_name = "Deploy-Private-DNS-Zones"
+  #     parameter_name  = "azureIotHubsPrivateDnsZoneId"
+  #   },
+  #   {
+  #     definition_name = "Deploy-Private-DNS-Zones"
+  #     parameter_name  = "azureIotDeviceupdatePrivateDnsZoneId"
+  #   },
+  #   {
+  #     definition_name = "Deploy-Private-DNS-Zones"
+  #     parameter_name  = "azureHDInsightPrivateDnsZoneId"
+  #   },
+  #   {
+  #     definition_name = "Deploy-Private-DNS-Zones"
+  #     parameter_name  = "azureMediaServicesKeyPrivateDnsZoneId"
+  #   },
+  #   {
+  #     definition_name = "Deploy-Private-DNS-Zones"
+  #     parameter_name  = "azureMediaServicesLivePrivateDnsZoneId"
+  #   },
+  #   {
+  #     definition_name = "Deploy-Private-DNS-Zones"
+  #     parameter_name  = "azureMediaServicesStreamPrivateDnsZoneId"
+  #   },
+  #   {
+  #     definition_name = "Deploy-Private-DNS-Zones"
+  #     parameter_name  = "azureDatabricksPrivateDnsZoneId"
+  #   },
+  #   {
+  #     definition_name = "Deploy-Private-DNS-Zones"
+  #     parameter_name  = "azureBackupPrivateDnsZoneId"
+  #   },
+  #   {
+  #     definition_name = "Deploy-Private-DNS-Zones"
+  #     parameter_name  = "azureFilePrivateDnsZoneId"
+  #   },
+  #   {
+  #     definition_name = "Deploy-Private-DNS-Zones"
+  #     parameter_name  = "azureManagedGrafanaWorkspacePrivateDnsZoneId"
+  #   },
+  #   {
+  #     definition_name = "Deploy-Private-DNS-Zones"
+  #     parameter_name  = "azureArcGuestconfigurationPrivateDnsZoneId"
+  #   },
+  #   {
+  #     definition_name = "Deploy-Private-DNS-Zones"
+  #     parameter_name  = "azureArcHybridResourceProviderPrivateDnsZoneId"
+  #   },
+  #   {
+  #     definition_name = "Deploy-Private-DNS-Zones"
+  #     parameter_name  = "azureArcKubernetesConfigurationPrivateDnsZoneId"
+  #   },
+  #   {
+  #     definition_name = "Deploy-Private-DNS-Zones"
+  #     parameter_name  = "azureWebPrivateDnsZoneId"
+  #   }
+  # ]
+ }
 
 management_resource_settings = {
   enabled                      = false
@@ -360,12 +486,24 @@ hub_virtual_networks = {
 
         # ── SQL (if using as data source) ────────────────────
         azure_sql_server            = { zone_name = "privatelink.database.windows.net" }
+
+        # ── Additional Private Link DNS Zones ──────────────────────────
+        azure_devices                = { zone_name = "privatelink.azure-devices.net" }
+        azure_hdinsight              = { zone_name = "privatelink.azurehdinsight.net" }
+        azure_media                  = { zone_name = "privatelink.media.azure.net" }
+        azure_databricks             = { zone_name = "privatelink.azuredatabricks.net" }
+        azure_backup_eus             = { zone_name = "privatelink.eus.backup.windowsazure.com" }
+        azure_afs                   = { zone_name = "privatelink.afs.azure.net" }
+        azure_grafana               = { zone_name = "privatelink.grafana.azure.com" }
+        azure_guest_configuration   = { zone_name = "privatelink.guestconfiguration.azure.com" }
+        azure_his_arc               = { zone_name = "privatelink.his.arc.azure.com" }
+        azure_dp_kubernetesconfig   = { zone_name = "privatelink.dp.kubernetesconfiguration.azure.com" }
+        azure_web_core              = { zone_name = "privatelink.web.core.windows.net" }
       }
 
       private_link_private_dns_zones_regex_filter = {
         enabled = false
       }
-
       auto_registration_zone_enabled = "$${primary_private_dns_auto_registration_zone_enabled}"
       auto_registration_zone_name    = "$${primary_auto_registration_zone_name}"
     }
